@@ -12,66 +12,87 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Sparkles } from "lucide-react";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] px-4 py-12">
-      <Card className="w-full max-w-md shadow-lg border-[#D1D5DB]">
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-3xl font-bold text-[#111827]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-6">
+      {/* Subtle Background Decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4F46E5]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#0EA5E9]/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <Card className="w-full max-w-[440px] shadow-xl border-[#D1D5DB] bg-white/95 backdrop-blur-sm relative z-10">
+        <CardHeader className="space-y-2 text-center pb-5">
+          {/* Logo/Brand */}
+          <div className="flex justify-center mb-1">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
             Create your account
           </CardTitle>
-          <CardDescription className="text-base text-[#6B7280]">
-            Join Portfolium and showcase your work
+          <CardDescription className="text-sm text-[#6B7280]">
+            Join Portfolium and showcase your work to the world
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        
+        <CardContent className="space-y-4 px-6 pb-6">
           {/* Email Input */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="email" className="text-sm font-medium text-[#111827]">
               Email address
             </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              className="h-11 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1]"
-            />
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
+              />
+            </div>
           </div>
 
           {/* Password Input */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="password" className="text-sm font-medium text-[#111827]">
               Password
             </Label>
             <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Create a strong password"
-                className="h-11 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1]"
+                className="h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#111827] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#4F46E5] transition-colors focus:outline-none focus:text-[#4F46E5]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
+                  <EyeOff className="h-4 w-4" />
                 ) : (
-                  <Eye className="h-5 w-5" />
+                  <Eye className="h-4 w-4" />
                 )}
               </button>
             </div>
+            {/* Password Hint */}
+            <p className="text-xs text-[#6B7280] px-1">
+              Must be at least 8 characters long
+            </p>
           </div>
 
           {/* Create Account Button */}
           <Button
-            className="w-full h-11 bg-[#4F46E5] hover:bg-[#3730A3] text-white font-semibold transition-colors"
+            className="w-full h-11 bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all shadow-md hover:shadow-lg"
           >
             Create Account
           </Button>
@@ -81,20 +102,20 @@ export default function SignUpPage() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-[#E5E7EB]" />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-[#6B7280]">or continue with</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-[#6B7280] font-medium">or continue with</span>
             </div>
           </div>
 
           {/* Social Buttons */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {/* Google Button */}
             <Button
               variant="outline"
-              className="h-11 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
-                className="mr-2 h-5 w-5"
+                className="mr-2 h-4 w-4 flex-shrink-0"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -115,16 +136,16 @@ export default function SignUpPage() {
                   fill="#EA4335"
                 />
               </svg>
-              Google
+              <span className="text-sm">Google</span>
             </Button>
 
             {/* GitHub Button */}
             <Button
               variant="outline"
-              className="h-11 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
-                className="mr-2 h-5 w-5"
+                className="mr-2 h-4 w-4 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
@@ -135,20 +156,32 @@ export default function SignUpPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              GitHub
+              <span className="text-sm">GitHub</span>
             </Button>
           </div>
 
           {/* Sign In Link */}
-          <div className="text-center text-sm">
+          <div className="text-center text-sm pt-1">
             <span className="text-[#6B7280]">Already have an account? </span>
             <Link
               href="/auth/signin"
-              className="font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors underline-offset-4 hover:underline"
+              className="font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors hover:underline"
             >
-              Sign in
+              Sign in →
             </Link>
           </div>
+
+          {/* Terms and Privacy */}
+          <p className="text-xs text-center text-[#9CA3AF] leading-relaxed">
+            By creating an account, you agree to our{" "}
+            <Link href="/terms" className="text-[#4F46E5] hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-[#4F46E5] hover:underline">
+              Privacy Policy
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
