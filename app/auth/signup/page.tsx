@@ -238,7 +238,7 @@ export default function SignUpPage() {
           <div className="flex items-start gap-2 p-3 bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg">
             <AlertCircle className="h-4 w-4 text-[#4F46E5] mt-0.5 flex-shrink-0" />
             <p className="text-xs text-[#4F46E5] leading-relaxed">
-              We'll send a verification email to confirm your address
+              We&apos;ll send a verification email to confirm your address
             </p>
           </div>
 

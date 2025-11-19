@@ -270,7 +270,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] italic">
-                  "Portfolium made it so easy to create a professional portfolio. The AI suggestions were spot on!"
+                  &quot;Portfolium made it so easy to create a professional portfolio. The AI suggestions were spot on!&quot;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-full"></div>
@@ -290,7 +290,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] italic">
-                  "I went from CV to published portfolio in under 10 minutes. Game changer for job hunting!"
+                  &quot;I went from CV to published portfolio in under 10 minutes. Game changer for job hunting!&quot;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#0EA5E9] to-[#38BDF8] rounded-full"></div>
@@ -310,7 +310,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] italic">
-                  "The templates are beautiful and the customization options are endless. Highly recommend!"
+                  &quot;The templates are beautiful and the customization options are endless. Highly recommend!&quot;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-[#34D399] rounded-full"></div>
@@ -425,7 +425,7 @@ export default function Home() {
             </p>
             <Link href="/auth/signup">
               <Button size="lg" className="bg-white text-[#4F46E5] hover:bg-white/90 h-12 px-8 text-base shadow-lg">
-                Get Started — It's Free
+                Get Started — It&apos;s Free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>

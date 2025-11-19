@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
               <div className="flex items-start gap-2 p-3 bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg">
                 <Mail className="h-4 w-4 text-[#4F46E5] mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-[#4F46E5] leading-relaxed">
-                  We'll send you a link to reset your password
+                  We&apos;ll send you a link to reset your password
                 </p>
               </div>
 
@@ -100,11 +100,11 @@ export default function ForgotPasswordPage() {
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-semibold text-[#111827]">Email sent!</h3>
                   <p className="text-sm text-[#6B7280] max-w-sm">
-                    We've sent password reset instructions to{" "}
+                    We&apos;ve sent password reset instructions to{" "}
                     <span className="font-medium text-[#4F46E5]">{email}</span>
                   </p>
                   <p className="text-xs text-[#9CA3AF] pt-2">
-                    Didn't receive the email? Check your spam folder or{" "}
+                    Didn&apos;t receive the email? Check your spam folder or{" "}
                     <button
                       onClick={() => setIsSubmitted(false)}
                       className="text-[#4F46E5] hover:text-[#3730A3] font-medium underline underline-offset-2"
@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
 
           {/* Alternative: Create Account */}
           <div className="text-center text-sm pt-2">
-            <span className="text-[#6B7280]">Don't have an account? </span>
+            <span className="text-[#6B7280]">Don&apos;t have an account? </span>
             <Link
               href="/auth/signup"
               className="font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors hover:underline"
