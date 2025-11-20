@@ -18,10 +18,10 @@ import {
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB] bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB] bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60">
         <div className="container flex h-16 items-center justify-between mx-auto px-4 max-w-7xl">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-xl text-[#111827]">Portfolium</span>
@@ -44,7 +44,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white">
+              <Button className="bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white">
                 Get Started
               </Button>
             </Link>
@@ -52,7 +52,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] py-20 sm:py-32">
+      <section className="relative overflow-hidden bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] py-20 sm:py-32">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#4F46E5]/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#0EA5E9]/10 rounded-full blur-3xl"></div>
@@ -64,7 +64,7 @@ export default function Home() {
             </Badge>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#111827] tracking-tight leading-tight">
               Build Your Portfolio <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-[#4F46E5] to-[#0EA5E9] bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-[#4F46E5] to-[#0EA5E9] bg-clip-text text-transparent">
                 in Minutes
               </span>
             </h1>
@@ -73,7 +73,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link href="/auth/signup">
-                <Button size="lg" className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white h-12 px-8 text-base shadow-lg">
+                <Button size="lg" className="bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white h-12 px-8 text-base shadow-lg">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -86,9 +86,9 @@ export default function Home() {
             </div>
             <div className="pt-8">
               <div className="relative max-w-3xl mx-auto">
-                <div className="aspect-video bg-gradient-to-br from-white to-[#EEF2FF] rounded-2xl shadow-2xl border border-[#D1D5DB] flex items-center justify-center">
+                <div className="aspect-video bg-linear-to-br from-white to-[#EEF2FF] rounded-2xl shadow-2xl border border-[#D1D5DB] flex items-center justify-center">
                   <div className="text-center space-y-3">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center mx-auto">
+                    <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center mx-auto">
                       <Sparkles className="w-8 h-8 text-white" />
                     </div>
                     <p className="text-[#6B7280] font-medium">Portfolio Preview</p>
@@ -192,7 +192,7 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
               <h3 className="text-xl font-semibold text-[#111827]">Choose or Upload</h3>
@@ -202,7 +202,7 @@ export default function Home() {
             </div>
 
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#0EA5E9] to-[#38BDF8] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <div className="w-16 h-16 bg-linear-to-br from-[#0EA5E9] to-[#38BDF8] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
                 <span className="text-2xl font-bold text-white">2</span>
               </div>
               <h3 className="text-xl font-semibold text-[#111827]">Customize with AI</h3>
@@ -212,7 +212,7 @@ export default function Home() {
             </div>
 
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#10B981] to-[#34D399] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <div className="w-16 h-16 bg-linear-to-br from-[#10B981] to-[#34D399] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
                 <span className="text-2xl font-bold text-white">3</span>
               </div>
               <h3 className="text-xl font-semibold text-[#111827]">Publish & Share</h3>
@@ -235,7 +235,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="border-[#E5E7EB] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-                <div className="aspect-[3/4] bg-gradient-to-br from-[#EEF2FF] to-[#E0E7FF] flex items-center justify-center relative">
+                <div className="aspect-[3/4] bg-linear-to-br from-[#EEF2FF] to-[#E0E7FF] flex items-center justify-center relative">
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
                   <div className="text-center space-y-2">
                     <LayoutTemplate className="w-12 h-12 text-[#4F46E5] mx-auto" />
@@ -273,7 +273,7 @@ export default function Home() {
                   &quot;Portfolium made it so easy to create a professional portfolio. The AI suggestions were spot on!&quot;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-full"></div>
+                  <div className="w-10 h-10 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-full"></div>
                   <div>
                     <p className="font-semibold text-[#111827]">Sarah Johnson</p>
                     <p className="text-sm text-[#6B7280]">UX Designer</p>
@@ -293,7 +293,7 @@ export default function Home() {
                   &quot;I went from CV to published portfolio in under 10 minutes. Game changer for job hunting!&quot;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#0EA5E9] to-[#38BDF8] rounded-full"></div>
+                  <div className="w-10 h-10 bg-linear-to-br from-[#0EA5E9] to-[#38BDF8] rounded-full"></div>
                   <div>
                     <p className="font-semibold text-[#111827]">Michael Chen</p>
                     <p className="text-sm text-[#6B7280]">Software Engineer</p>
@@ -313,7 +313,7 @@ export default function Home() {
                   &quot;The templates are beautiful and the customization options are endless. Highly recommend!&quot;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-[#34D399] rounded-full"></div>
+                  <div className="w-10 h-10 bg-linear-to-br from-[#10B981] to-[#34D399] rounded-full"></div>
                   <div>
                     <p className="font-semibold text-[#111827]">Emily Rodriguez</p>
                     <p className="text-sm text-[#6B7280]">Marketing Manager</p>
@@ -369,7 +369,7 @@ export default function Home() {
 
             <Card className="border-[#4F46E5] border-2 relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white border-0">
+                <Badge className="bg-linear-to-r from-[#4F46E5] to-[#6366F1] text-white border-0">
                   Most Popular
                 </Badge>
               </div>
@@ -407,7 +407,7 @@ export default function Home() {
                     <span className="text-[#6B7280]">Priority Support</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white">
+                <Button className="w-full bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white">
                   Upgrade to Pro
                 </Button>
               </CardContent>
@@ -416,7 +416,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] text-white">
+      <section className="py-20 bg-linear-to-br from-[#4F46E5] to-[#6366F1] text-white">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center max-w-3xl mx-auto space-y-8">
             <h2 className="text-4xl md:text-5xl font-bold">Start building your portfolio today</h2>
@@ -438,7 +438,7 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 <span className="font-bold text-xl text-[#111827]">Portfolium</span>

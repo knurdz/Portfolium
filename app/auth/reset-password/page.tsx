@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,53 +12,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff, Lock, CheckCircle2, XCircle, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock, CheckCircle2, XCircle, Sparkles, AlertCircle } from "lucide-react";
 
-export default function ResetPasswordPage() {
+import { resetPassword } from "@/lib/actions/auth";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function ResetPasswordForm() {
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId");
+  const secret = searchParams.get("secret");
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [state, formAction, isPending] = useActionState(resetPassword, { error: "" });
 
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
   const passwordsDontMatch = password && confirmPassword && password !== confirmPassword;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordsMatch && password.length >= 8) {
-      setIsSubmitted(true);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-8">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4F46E5]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#0EA5E9]/5 rounded-full blur-3xl"></div>
-      </div>
+    <CardContent className="space-y-5 px-6 pb-6">
+              {/* Error Message */}
+              {state?.error && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+                  <p className="text-xs text-red-600 leading-relaxed">
+                    {state.error}
+                  </p>
+                </div>
+              )}
 
-      <Card className="w-full max-w-[440px] shadow-xl border-[#D1D5DB] bg-white/95 backdrop-blur-sm relative z-10">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <div className="flex justify-center mb-1">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
-            {isSubmitted ? "Password reset successful!" : "Reset your password"}
-          </CardTitle>
-          <CardDescription className="text-sm text-[#6B7280]">
-            {isSubmitted
-              ? "Your password has been successfully reset"
-              : "Create a new password to secure your account"}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-5 px-6 pb-6">
-          {!isSubmitted ? (
-            <>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form action={formAction} className="space-y-4">
+                <input type="hidden" name="userId" value={userId || ""} />
+                <input type="hidden" name="secret" value={secret || ""} />
                 <div className="space-y-1.5">
                   <Label htmlFor="password" className="text-sm font-medium text-[#111827]">
                     New password
@@ -67,6 +55,7 @@ export default function ResetPasswordPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
                     <Input
                       id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter new password"
                       value={password}
@@ -109,6 +98,7 @@ export default function ResetPasswordPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
                     <Input
                       id="confirmPassword"
+                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       value={confirmPassword}
@@ -150,28 +140,12 @@ export default function ResetPasswordPage() {
 
                 <Button
                   type="submit"
-                  disabled={!passwordsMatch || password.length < 8}
-                  className="w-full h-11 bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!passwordsMatch || password.length < 8 || isPending}
+                  className="w-full h-11 bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Reset Password
+                  {isPending ? "Resetting..." : "Reset Password"}
                 </Button>
               </form>
-            </>
-          ) : (
-            <>
-              <div className="flex flex-col items-center justify-center py-4 space-y-4">
-                <div className="w-16 h-16 bg-[#DCFCE7] rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-[#10B981]" />
-                </div>
-                <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold text-[#111827]">All set!</h3>
-                  <p className="text-sm text-[#6B7280] max-w-sm">
-                    Your password has been reset successfully. You can now sign in with your new password.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -184,10 +158,39 @@ export default function ResetPasswordPage() {
               href="/auth/signin"
               className="inline-flex items-center gap-2 text-sm font-medium text-[#4F46E5] hover:text-[#3730A3] transition-colors"
             >
-              {isSubmitted ? "Go to Sign In" : "Back to Sign In"}
+              Back to Sign In
             </Link>
           </div>
         </CardContent>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-8">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4F46E5]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#0EA5E9]/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <Card className="w-full max-w-[440px] shadow-xl border-[#D1D5DB] bg-white/95 backdrop-blur-sm relative z-10">
+        <CardHeader className="space-y-2 text-center pb-6">
+          <div className="flex justify-center mb-1">
+            <div className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
+            Reset your password
+          </CardTitle>
+          <CardDescription className="text-sm text-[#6B7280]">
+            Create a new password to secure your account
+          </CardDescription>
+        </CardHeader>
+
+        <Suspense fallback={<div>Loading...</div>}>
+          <ResetPasswordForm />
+        </Suspense>
       </Card>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,12 +15,16 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, Sparkles, User, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
+import { signUp, signInWithOAuth } from "@/lib/actions/auth";
+
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  
+  const [state, formAction, isPending] = useActionState(signUp, { error: "" });
 
   // Password strength calculation
   const getPasswordStrength = (pass: string) => {
@@ -43,7 +47,7 @@ export default function SignUpPage() {
   const passwordsDontMatch = password && confirmPassword && password !== confirmPassword;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-8">
       {/* Subtle Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4F46E5]/5 rounded-full blur-3xl"></div>
@@ -54,7 +58,7 @@ export default function SignUpPage() {
         <CardHeader className="space-y-2 text-center pb-4">
           {/* Logo/Brand */}
           <div className="flex justify-center mb-1">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+            <div className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -67,6 +71,13 @@ export default function SignUpPage() {
         </CardHeader>
         
         <CardContent className="space-y-4 px-6 pb-6">
+          {state?.error && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">{state.error}</p>
+            </div>
+          )}
+          <form action={formAction} className="space-y-4">
           {/* Full Name Input */}
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-sm font-medium text-[#111827]">
@@ -76,9 +87,10 @@ export default function SignUpPage() {
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="name"
+                name="name"
                 type="text"
                 placeholder="John Doe"
-                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
+                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -92,9 +104,10 @@ export default function SignUpPage() {
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="you@example.com"
-                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
+                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -108,11 +121,12 @@ export default function SignUpPage() {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a strong password"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
+                className="h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
               <button
                 type="button"
@@ -168,7 +182,7 @@ export default function SignUpPage() {
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all ${
+                className={`h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] placeholder:text-gray-400 transition-all ${
                   passwordsMatch ? "border-[#10B981]" : passwordsDontMatch ? "border-[#EF4444]" : ""
                 }`}
               />
@@ -228,11 +242,13 @@ export default function SignUpPage() {
 
           {/* Create Account Button */}
           <Button
-            disabled={!agreedToTerms}
-            className="w-full h-11 bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            type="submit"
+            disabled={!agreedToTerms || isPending}
+            className="w-full h-11 bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Account
+            {isPending ? "Creating account..." : "Create Account"}
           </Button>
+          </form>
 
           {/* Email Verification Notice */}
           <div className="flex items-start gap-2 p-3 bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg">
@@ -255,9 +271,10 @@ export default function SignUpPage() {
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-3">
             {/* Google Button */}
+            <form action={signInWithOAuth.bind(null, "google")}>
             <Button
               variant="outline"
-              className="h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
                 className="mr-2 h-4 w-4 flex-shrink-0"
@@ -283,11 +300,13 @@ export default function SignUpPage() {
               </svg>
               <span className="text-sm">Google</span>
             </Button>
+            </form>
 
             {/* GitHub Button */}
+            <form action={signInWithOAuth.bind(null, "github")}>
             <Button
               variant="outline"
-              className="h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
                 className="mr-2 h-4 w-4 flex-shrink-0"
@@ -303,6 +322,7 @@ export default function SignUpPage() {
               </svg>
               <span className="text-sm">GitHub</span>
             </Button>
+            </form>
           </div>
 
           {/* Sign In Link */}

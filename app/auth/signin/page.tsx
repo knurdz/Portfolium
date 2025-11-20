@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff, Mail, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
+
+import { signIn, signInWithOAuth } from "@/lib/actions/auth";
+import { useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
+  const successMessage = searchParams.get("success");
+  
+  const [state, formAction, isPending] = useActionState(signIn, { error: "" });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-6">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-6">
       {/* Subtle Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4F46E5]/5 rounded-full blur-3xl"></div>
@@ -31,7 +39,7 @@ export default function SignInPage() {
         <CardHeader className="space-y-2 text-center pb-5">
           {/* Logo/Brand */}
           <div className="flex justify-center mb-1">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+            <div className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -44,6 +52,23 @@ export default function SignInPage() {
         </CardHeader>
         
         <CardContent className="space-y-4 px-6 pb-6">
+          {successMessage && (
+            <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-green-600 leading-relaxed">
+                {decodeURIComponent(successMessage)}
+              </p>
+            </div>
+          )}
+          {(state?.error || urlError) && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">
+                {state?.error || decodeURIComponent(urlError || "")}
+              </p>
+            </div>
+          )}
+          <form action={formAction} className="space-y-4">
           {/* Email Input */}
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-sm font-medium text-[#111827]">
@@ -53,9 +78,10 @@ export default function SignInPage() {
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="you@example.com"
-                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
+                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -77,9 +103,10 @@ export default function SignInPage() {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all"
+                className="h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
               <button
                 type="button"
@@ -114,10 +141,13 @@ export default function SignInPage() {
 
           {/* Sign In Button */}
           <Button
-            className="w-full h-11 bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all shadow-md hover:shadow-lg"
+            type="submit"
+            disabled={isPending}
+            className="w-full h-11 bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
           >
-            Sign In
+            {isPending ? "Signing in..." : "Sign in"}
           </Button>
+          </form>
 
           {/* Divider */}
           <div className="relative">
@@ -132,12 +162,13 @@ export default function SignInPage() {
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-3">
             {/* Google Button */}
+            <form action={signInWithOAuth.bind(null, "google")}>
             <Button
               variant="outline"
-              className="h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
-                className="mr-2 h-4 w-4 flex-shrink-0"
+                className="mr-2 h-4 w-4 shrink-0"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -160,14 +191,16 @@ export default function SignInPage() {
               </svg>
               <span className="text-sm">Google</span>
             </Button>
+            </form>
 
             {/* GitHub Button */}
+            <form action={signInWithOAuth.bind(null, "github")}>
             <Button
               variant="outline"
-              className="h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
-                className="mr-2 h-4 w-4 flex-shrink-0"
+                className="mr-2 h-4 w-4 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
@@ -180,6 +213,7 @@ export default function SignInPage() {
               </svg>
               <span className="text-sm">GitHub</span>
             </Button>
+            </form>
           </div>
 
           {/* Sign Up Link */}
