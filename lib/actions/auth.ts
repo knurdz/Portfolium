@@ -5,7 +5,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ID, Client, Account } from "node-appwrite";
 
-export async function signUp(prevState: any, formData: FormData) {
+interface FormState {
+  error?: string;
+}
+
+export async function signUp(_prevState: FormState | null, formData: FormData): Promise<FormState | never> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
@@ -51,7 +55,7 @@ export async function signUp(prevState: any, formData: FormData) {
   redirect("/auth/check-email");
 }
 
-export async function signIn(prevState: any, formData: FormData) {
+export async function signIn(_prevState: FormState | null, formData: FormData): Promise<FormState | never> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -95,13 +99,13 @@ export async function signOut() {
   redirect("/auth/signin");
 }
 
-export async function signInWithOAuth(provider: string, prevState?: any, formData?: FormData) {
+export async function signInWithOAuth(provider: string): Promise<never> {
   redirect(
     `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/account/sessions/oauth2/${provider}?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}&success=${process.env.NEXT_PUBLIC_APP_URL}/oauth&failure=${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=OAuth+cancelled`
   );
 }
 
-export async function forgotPassword(prevState: any, formData: FormData) {
+export async function forgotPassword(_prevState: FormState | null, formData: FormData): Promise<FormState | never> {
   const email = formData.get("email") as string;
   
   if (!email) {
@@ -121,7 +125,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
   redirect("/auth/check-email");
 }
 
-export async function resetPassword(prevState: any, formData: FormData) {
+export async function resetPassword(_prevState: FormState | null, formData: FormData): Promise<FormState | never> {
   const userId = formData.get("userId") as string;
   const secret = formData.get("secret") as string;
   const password = formData.get("password") as string;

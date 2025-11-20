@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { Client, Account } from "node-appwrite";
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
 
   try {
     // Create a client to check the session
