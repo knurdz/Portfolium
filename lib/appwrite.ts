@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 export const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
 export const PORTFOLIOS_COLLECTION_ID = process.env.APPWRITE_PORTFOLIOS_COLLECTION_ID!;
+export const JOBS_COLLECTION_ID = process.env.APPWRITE_JOBS_COLLECTION_ID || "generation_jobs";
 
 export async function createSessionClient() {
   const client = new Client()

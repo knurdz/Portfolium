@@ -51,8 +51,9 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
   const [userDetails, setUserDetails] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingStatus, setGeneratingStatus] = useState("");
   const [generatedPortfolio, setGeneratedPortfolio] = useState<string>(existingPortfolio?.htmlContent || "");
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState("groq");
   const [subdomain, setSubdomain] = useState(existingPortfolio?.subdomain || "");
   const [subdomainError, setSubdomainError] = useState("");
   const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false);
@@ -187,6 +188,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
 
     setIsGenerating(true);
     setGeneratedPortfolio("");
+    setGeneratingStatus("Starting portfolio generation...");
 
     try {
       // Prepare form data
@@ -197,46 +199,103 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
         formData.append("cv", cvFile);
       }
 
-      console.log("Sending request to generate portfolio...");
+      console.log("Starting async portfolio generation...");
+      setGeneratingStatus("Connecting to AI service...");
       
-      // Call API to generate portfolio using Gemini
+      // Start async generation
       const response = await fetch("/api/generate-portfolio", {
         method: "POST",
         body: formData,
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-      
-      // Check if response has content
-      const contentType = response.headers.get("content-type");
-      console.log("Content-Type:", contentType);
-      
-      if (!contentType || !contentType.includes("application/json")) {
-        const textResponse = await response.text();
-        console.error("Non-JSON response:", textResponse);
-        throw new Error(`Server returned non-JSON response: ${textResponse.substring(0, 200)}`);
-      }
-      
-      const data = await response.json();
-      console.log("Response data received, portfolio length:", data.portfolio?.length);
-
       if (!response.ok) {
-        const errorMsg = data.details ? `${data.error}\n\nDetails: ${data.details}` : data.error;
-        throw new Error(errorMsg || "Failed to generate portfolio");
-      }
-      
-      if (!data.portfolio || data.portfolio.trim().length === 0) {
-        throw new Error("Server returned empty portfolio content");
+        const data = await response.json();
+        throw new Error(data.error || "Failed to start generation");
       }
 
-      setGeneratedPortfolio(data.portfolio);
-      addToast({
-        title: "Portfolio Generated!",
-        description: `Your portfolio has been created with ${data.provider}. Review it and click Publish to make it live.`,
-        variant: "success",
-      });
-      console.log("Portfolio generated successfully with provider:", data.provider);
+      const { jobId } = await response.json();
+      console.log("Job started with ID:", jobId);
+      setGeneratingStatus("Generating your portfolio with AI...");
+
+      // Small delay to ensure job is initialized
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Poll for completion
+      const pollInterval = 2000; // Poll every 2 seconds
+      const maxAttempts = 60; // Max 2 minutes (60 * 2s = 120s)
+      let attempts = 0;
+
+      const poll = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          const checkStatus = async () => {
+            attempts++;
+            
+            if (attempts > maxAttempts) {
+              reject(new Error("Portfolio generation timed out. Please try again."));
+              return;
+            }
+
+            setGeneratingStatus(`Generating your portfolio... (${Math.floor(attempts * 2)}s)`);
+
+            try {
+              const statusResponse = await fetch(`/api/generate-portfolio/status?jobId=${jobId}`);
+              
+              if (statusResponse.status === 404) {
+                // Job not found - might have been cleaned up or never existed
+                console.error("Job not found:", jobId);
+                reject(new Error("Generation job not found. Please try again."));
+                return;
+              }
+              
+              if (!statusResponse.ok) {
+                const errorData = await statusResponse.json().catch(() => ({ error: "Unknown error" }));
+                console.error("Status check failed:", errorData);
+                // Don't fail immediately on status check errors, retry
+                if (attempts >= maxAttempts) {
+                  reject(new Error(errorData.error || "Failed to check generation status"));
+                  return;
+                }
+                setTimeout(checkStatus, pollInterval);
+                return;
+              }
+
+              const status = await statusResponse.json();
+              console.log(`Poll attempt ${attempts}:`, status.status);
+
+              if (status.status === 'completed') {
+                setGeneratingStatus("Finalizing your portfolio...");
+                setGeneratedPortfolio(status.portfolio);
+                addToast({
+                  title: "Portfolio Generated!",
+                  description: `Your portfolio has been created with ${status.provider}. Review it and click Publish to make it live.`,
+                  variant: "success",
+                });
+                console.log("Portfolio generated successfully with provider:", status.provider);
+                resolve();
+              } else if (status.status === 'failed') {
+                reject(new Error(status.error || "Portfolio generation failed"));
+              } else {
+                // Still processing, poll again
+                setTimeout(checkStatus, pollInterval);
+              }
+            } catch (pollError) {
+              // If polling fails, log and retry (unless max attempts reached)
+              console.error("Poll error:", pollError);
+              if (attempts >= maxAttempts) {
+                reject(pollError);
+                return;
+              }
+              // Retry after interval
+              setTimeout(checkStatus, pollInterval);
+            }
+          };
+
+          checkStatus();
+        });
+      };
+
+      // Start polling
+      await poll();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to generate portfolio. Please try again.";
       console.error("Error generating portfolio:", errorMessage);
@@ -248,6 +307,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
       });
     } finally {
       setIsGenerating(false);
+      setGeneratingStatus("");
     }
   };
 
@@ -345,9 +405,9 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
         </header>
 
         {/* Main Area */}
-        <main className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+        <main className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
           {/* Input Section */}
-          <div className="lg:w-1/2 border-b lg:border-b-0 lg:border-r border-[#E5E7EB] flex flex-col bg-white">
+          <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-[#E5E7EB] flex flex-col bg-white lg:overflow-y-auto">
             <div className="p-6 border-b border-[#E5E7EB]">
               <h2 className="text-lg font-semibold text-[#111827] mb-2">Your Information</h2>
               <p className="text-sm text-[#6B7280]">
@@ -355,7 +415,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
               </p>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 lg:overflow-y-auto p-6">
               <form onSubmit={handleGeneratePortfolio} className="space-y-6">
                 {/* Model Selection */}
                 <div className="space-y-2">
@@ -366,13 +426,13 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
                     id="model"
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
-                    className="w-full h-10 px-3 rounded-md border border-[#D1D5DB] text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+                    disabled={isGenerating}
+                    className="w-full h-10 px-3 rounded-md border border-[#D1D5DB] text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Faster)</option>
-                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Better Quality)</option>
+                    <option value="groq">Groq Llama 3.3 70B</option>
                   </select>
                   <p className="text-xs text-[#6B7280]">
-                    Flash: Faster generation | Pro: Higher quality output
+                    Fast & high-quality AI portfolio generation
                   </p>
                 </div>
 
@@ -389,7 +449,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
                       onChange={handleSubdomainChange}
                       placeholder="johndoe"
                       className="flex-1 placeholder:text-gray-400"
-                      disabled={!!existingPortfolio}
+                      disabled={!!existingPortfolio || isGenerating}
                     />
                     {isCheckingSubdomain && (
                       <Loader2 className="w-5 h-5 text-[#6B7280] animate-spin" />
@@ -429,8 +489,9 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
                     value={userDetails}
                     onChange={(e) => setUserDetails(e.target.value)}
                     placeholder="Tell us about yourself... Include:&#10;• Full Name&#10;• Professional Title&#10;• Skills & Expertise&#10;• Work Experience&#10;• Education&#10;• Projects&#10;• Contact Information&#10;• Social Media Links"
-                    className="min-h-[300px] text-sm placeholder:text-gray-400"
+                    className="min-h-[300px] text-sm placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                     rows={12}
+                    disabled={isGenerating}
                   />
                 </div>
 
@@ -463,6 +524,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
                       className="flex-1"
+                      disabled={isGenerating}
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       {cvFile ? cvFile.name : "Choose File"}
@@ -531,12 +593,12 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
           </div>
 
           {/* Preview Section */}
-          <div className="lg:w-1/2 flex flex-col bg-[#F9FAFB]">
+          <div className="w-full lg:w-1/2 flex flex-col bg-[#F9FAFB] lg:overflow-hidden">
             <div className="p-6 border-b border-[#E5E7EB] bg-white flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#111827]">Preview</h2>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 lg:overflow-y-auto p-6">
               {!generatedPortfolio && !isGenerating ? (
                 <div className="flex flex-col items-center justify-center h-full text-center px-4">
                   <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
@@ -552,7 +614,8 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
               ) : isGenerating ? (
                 <div className="flex flex-col items-center justify-center h-full">
                   <Loader2 className="w-12 h-12 text-[#4F46E5] animate-spin mb-4" />
-                  <p className="text-[#6B7280]">Generating your portfolio with AI...</p>
+                  <p className="text-[#4F46E5] font-medium mb-2">{generatingStatus || "Generating your portfolio with AI..."}</p>
+                  <p className="text-[#6B7280] text-sm">This may take up to 2 minutes. Please wait...</p>
                 </div>
               ) : (
                 <div className="bg-white rounded-lg shadow-sm border border-[#E5E7EB] overflow-hidden">
