@@ -20,11 +20,13 @@ import { signUp, signInWithOAuth } from "@/lib/actions/auth";
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   
-  const [state, formAction, isPending] = useActionState(signUp, { error: "" });
+  const [state, formAction, isPending] = useActionState(signUp, null);
 
   // Password strength calculation
   const getPasswordStrength = (pass: string) => {
@@ -77,7 +79,16 @@ export default function SignUpPage() {
               <p className="text-xs text-red-600 leading-relaxed">{state.error}</p>
             </div>
           )}
-          <form action={formAction} className="space-y-4">
+          <form 
+            action={formAction} 
+            className="space-y-4"
+            onSubmit={(e) => {
+              if (!passwordsMatch && confirmPassword) {
+                e.preventDefault();
+                return;
+              }
+            }}
+          >
           {/* Full Name Input */}
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-sm font-medium text-[#111827]">
@@ -90,6 +101,8 @@ export default function SignUpPage() {
                 name="name"
                 type="text"
                 placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
             </div>
@@ -107,6 +120,8 @@ export default function SignUpPage() {
                 name="email"
                 type="email"
                 placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
               />
             </div>
@@ -178,6 +193,7 @@ export default function SignUpPage() {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
               <Input
                 id="confirmPassword"
+                name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm your password"
                 value={confirmPassword}

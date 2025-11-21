@@ -25,7 +25,7 @@ function SignInForm() {
   const urlError = searchParams.get("error");
   const successMessage = searchParams.get("success");
   
-  const [state, formAction, isPending] = useActionState(signIn, { error: "" });
+  const [state, formAction, isPending] = useActionState(signIn, null);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-6">
