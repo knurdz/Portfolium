@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 
-import { signIn, signInWithOAuth } from "@/lib/actions/auth";
+import { signIn } from "@/lib/actions/auth";
+import { account, OAuthProvider } from "@/lib/appwrite-client";
 import { useSearchParams } from "next/navigation";
 
 function SignInForm() {
@@ -39,9 +40,9 @@ function SignInForm() {
         <CardHeader className="space-y-2 text-center pb-5">
           {/* Logo/Brand */}
           <div className="flex justify-center mb-1">
-            <div className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+            <Link href="/" className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow cursor-pointer">
               <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            </Link>
           </div>
           <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
             Welcome back
@@ -162,10 +163,17 @@ function SignInForm() {
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-3">
             {/* Google Button */}
-            <form action={signInWithOAuth.bind(null, "google")}>
             <Button
+              type="button"
               variant="outline"
               className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              onClick={() => {
+                account.createOAuth2Session({
+                  provider: OAuthProvider.Google,
+                  success: `${window.location.origin}/dashboard`,
+                  failure: `${window.location.origin}/auth/signin?error=OAuth+cancelled`
+                });
+              }}
             >
               <svg
                 className="mr-2 h-4 w-4 shrink-0"
@@ -191,13 +199,19 @@ function SignInForm() {
               </svg>
               <span className="text-sm">Google</span>
             </Button>
-            </form>
 
             {/* GitHub Button */}
-            <form action={signInWithOAuth.bind(null, "github")}>
             <Button
+              type="button"
               variant="outline"
               className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              onClick={() => {
+                account.createOAuth2Session({
+                  provider: OAuthProvider.Github,
+                  success: `${window.location.origin}/dashboard`,
+                  failure: `${window.location.origin}/auth/signin?error=OAuth+cancelled`
+                });
+              }}
             >
               <svg
                 className="mr-2 h-4 w-4 shrink-0"
@@ -213,7 +227,6 @@ function SignInForm() {
               </svg>
               <span className="text-sm">GitHub</span>
             </Button>
-            </form>
           </div>
 
           {/* Sign Up Link */}

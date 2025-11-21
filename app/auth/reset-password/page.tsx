@@ -176,9 +176,9 @@ export default function ResetPasswordPage() {
       <Card className="w-full max-w-[440px] shadow-xl border-[#D1D5DB] bg-white/95 backdrop-blur-sm relative z-10">
         <CardHeader className="space-y-2 text-center pb-6">
           <div className="flex justify-center mb-1">
-            <div className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+            <Link href="/" className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow cursor-pointer">
               <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            </Link>
           </div>
           <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
             Reset your password

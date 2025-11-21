@@ -94,7 +94,7 @@ export async function savePortfolio(
       return {
         success: true,
         portfolioId,
-        url: `https://${subdomain}.portfolium.knurdz.org`
+        url: `https://${subdomain}.portfolio.knurdz.org`
       };
     } else {
       // Create new portfolio
@@ -112,7 +112,7 @@ export async function savePortfolio(
       return {
         success: true,
         portfolioId: portfolio.$id,
-        url: `https://${subdomain}.portfolium.knurdz.org`
+        url: `https://${subdomain}.portfolio.knurdz.org`
       };
     }
   } catch (error: unknown) {

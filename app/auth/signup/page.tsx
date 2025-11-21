@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, Sparkles, User, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
-import { signUp, signInWithOAuth } from "@/lib/actions/auth";
+import { signUp } from "@/lib/actions/auth";
+import { account, OAuthProvider } from "@/lib/appwrite-client";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -60,9 +61,9 @@ export default function SignUpPage() {
         <CardHeader className="space-y-2 text-center pb-4">
           {/* Logo/Brand */}
           <div className="flex justify-center mb-1">
-            <div className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md">
+            <Link href="/" className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow cursor-pointer">
               <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            </Link>
           </div>
           <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
             Create your account
@@ -287,9 +288,16 @@ export default function SignUpPage() {
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-3">
             {/* Google Button */}
-            <form action={signInWithOAuth.bind(null, "google")}>
             <Button
+              type="button"
               variant="outline"
+              onClick={() => {
+                account.createOAuth2Session(
+                  OAuthProvider.Google,
+                  `${window.location.origin}/dashboard`,
+                  `${window.location.origin}/auth/signup?error=OAuth+cancelled`
+                );
+              }}
               className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
@@ -316,12 +324,18 @@ export default function SignUpPage() {
               </svg>
               <span className="text-sm">Google</span>
             </Button>
-            </form>
 
             {/* GitHub Button */}
-            <form action={signInWithOAuth.bind(null, "github")}>
             <Button
+              type="button"
               variant="outline"
+              onClick={() => {
+                account.createOAuth2Session(
+                  OAuthProvider.Github,
+                  `${window.location.origin}/dashboard`,
+                  `${window.location.origin}/auth/signup?error=OAuth+cancelled`
+                );
+              }}
               className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
             >
               <svg
@@ -338,7 +352,6 @@ export default function SignUpPage() {
               </svg>
               <span className="text-sm">GitHub</span>
             </Button>
-            </form>
           </div>
 
           {/* Sign In Link */}
