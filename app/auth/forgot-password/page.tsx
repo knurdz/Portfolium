@@ -18,7 +18,7 @@ import { forgotPassword } from "@/lib/actions/auth";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [state, formAction, isPending] = useActionState(forgotPassword, { error: "" });
+  const [state, formAction, isPending] = useActionState(forgotPassword, null);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-8">

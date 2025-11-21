@@ -27,7 +27,7 @@ function ResetPasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [state, formAction, isPending] = useActionState(resetPassword, { error: "" });
+  const [state, formAction, isPending] = useActionState(resetPassword, null);
 
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
   const passwordsDontMatch = password && confirmPassword && password !== confirmPassword;
