@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateJobId, generationStatus } from "./storage";
+import { createAdminClient, DATABASE_ID, JOBS_COLLECTION_ID } from "@/lib/appwrite";
 
 // Fallback function using OpenAI-compatible API (Groq is free and fast)
 async function generateWithGroq(userInfo: string) {
@@ -57,36 +58,6 @@ Return ONLY the complete HTML code, no explanations or markdown code blocks. The
   return data.choices[0].message.content;
 }
 
-// Fallback using Hugging Face (also free)
-async function generateWithHuggingFace(userInfo: string) {
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
-  if (!apiKey) {
-    throw new Error("HUGGINGFACE_API_KEY not configured");
-  }
-
-  const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      inputs: `Create a complete HTML portfolio page with embedded CSS based on this information: ${userInfo.substring(0, 1500)}. Return only HTML code, no explanations.`,
-      parameters: {
-        max_new_tokens: 3000,
-        temperature: 0.7,
-      }
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Hugging Face API error");
-  }
-
-  const data = await response.json();
-  return data[0].generated_text;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -118,137 +89,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate job ID for async processing
+    const jobId = generateJobId();
+    
+    // Initialize job status in database (with fallback to in-memory)
+    let useDatabase = true;
+    try {
+      const { databases } = await createAdminClient();
+      await databases.createDocument(
+        DATABASE_ID,
+        JOBS_COLLECTION_ID,
+        jobId,
+        {
+          status: 'processing',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      );
+      console.log(`[${jobId}] Job created in database`);
+    } catch (dbError: unknown) {
+      console.warn(`[${jobId}] Database unavailable, using in-memory storage:`, (dbError as Error).message);
+      // Fallback to in-memory storage if database collection doesn't exist
+      useDatabase = false;
+      generationStatus.set(jobId, { status: 'processing' });
+      console.log(`[${jobId}] Job created in memory (fallback)`);
+      console.log(`[${jobId}] In-memory jobs after creation:`, Array.from(generationStatus.keys()));
+    }
+    
+    // Start async generation (don't await)
+    generatePortfolioAsync(jobId, userInfo, selectedModel, useDatabase);
+
+    // Return job ID immediately
+    return NextResponse.json({ 
+      jobId,
+      message: "Portfolio generation started. Poll /api/generate-portfolio/status?jobId=" + jobId
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Error starting portfolio generation:", err);
+    return NextResponse.json(
+      { error: "Failed to start portfolio generation", details: err.message },
+      { status: 500 }
+    );
+  }
+}
+
+// Async generation function
+async function generatePortfolioAsync(jobId: string, userInfo: string, selectedModel: string, useDatabase: boolean = true) {
+  console.log(`[${jobId}] Starting portfolio generation with Groq using ${useDatabase ? 'database' : 'in-memory'} storage...`);
+  
+  try {
     let portfolio = "";
     let usedProvider = "";
 
-    // Try Gemini first
+    // Use Groq for generation
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("GEMINI_API_KEY not configured");
-      }
-      
-      console.log(`Trying Gemini AI with model: ${selectedModel}...`);
-      console.log("API Key exists:", !!apiKey);
-      console.log("User info length:", userInfo.length);
-      
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: selectedModel });
-
-      const prompt = `You are an expert web developer and designer specializing in modern, aesthetic portfolio websites. Create a stunning, professional single-page portfolio from the following information.
-
-User Information:
-${userInfo.substring(0, 500)}${userInfo.length > 500 ? "..." : ""}
-
-CRITICAL REQUIREMENTS:
-1. Create a complete HTML document with <!DOCTYPE html>, <html>, <head>, and <body> tags
-2. DO NOT include <link> or <script> tags for Tailwind CSS, Font Awesome, AOS, or Google Fonts (already loaded in parent app)
-3. Use ONLY inline styles and inline JavaScript - embed all custom CSS in <style> tags in <head>
-
-AVAILABLE LIBRARIES (Pre-loaded, just use them):
-- Tailwind CSS: Use utility classes freely (bg-gradient-to-r, backdrop-blur-lg, etc.)
-- Font Awesome 6.5.1: Use <i class="fas fa-icon-name"></i> or <i class="fab fa-icon-name"></i>
-- AOS (Animate On Scroll): Add data-aos="fade-up" or data-aos="zoom-in" to elements
-- Google Fonts: Inter (body), Poppins (headings), Playfair Display (accents)
-
-MODERN DESIGN REQUIREMENTS:
-Color Scheme:
-- Use vibrant gradients: bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400
-- Glassmorphism effects: backdrop-blur-lg bg-white/10 border border-white/20
-- Dark mode friendly colors
-
-Layout & Sections:
-1. Hero Section: Full-screen with gradient background, animated gradient text, professional photo placeholder
-2. About: Glassmorphism card with personality, use grid layout
-3. Skills: Grid of animated skill cards with Font Awesome icons and visual proficiency bars
-4. Experience: Modern timeline with hover effects and company icons
-5. Projects: Card grid with image placeholders, hover lift effects, and action buttons
-6. Education: Timeline or modern card layout with icons
-7. Contact: Floating contact section with social icons and links
-
-Styling Guidelines:
-- Typography: font-['Inter'] for body, font-['Poppins'] for headings
-- Spacing: Use generous padding (py-20, px-8, space-y-12)
-- Shadows: shadow-2xl, shadow-purple-500/20
-- Borders: rounded-2xl, rounded-3xl
-- Transitions: transition-all duration-500 ease-in-out
-- Hover effects: hover:scale-105, hover:shadow-2xl
-- Responsive: sm:, md:, lg:, xl: breakpoints
-
-Modern Features:
-- Gradient text: bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent
-- Floating elements: animate-bounce, animate-pulse
-- Smooth scroll: Add smooth scroll behavior
-- Interactive buttons: Gradient backgrounds with hover effects
-- Skill bars: Animated progress bars with percentages
-- Cards: 3D hover effects using transform
-
-Animation:
-- Add data-aos="fade-up" to all major sections
-- Use data-aos-delay="100", "200", "300" for staggered animations
-- Add custom CSS animations for gradient backgrounds
-
-Responsive Design:
-- Mobile-first approach
-- Stack sections on mobile, grid on desktop
-- Hide/show elements based on screen size
-- Touch-friendly buttons and links
-
-Return ONLY the complete HTML code. Make it visually stunning, modern, and professional.`;
-
-      console.log("Sending request to Gemini...");
-      const result = await Promise.race([
-        model.generateContent(prompt),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error("Request timeout after 60s")), 60000)
-        )
-      ]);
-      
-      console.log("Received response from Gemini");
-      const response = result.response;
-      
-      if (!response) {
-        throw new Error("Empty response from Gemini");
-      }
-      
-      portfolio = response.text();
-      
-      if (!portfolio || portfolio.trim().length === 0) {
-        throw new Error("Gemini returned empty portfolio content");
-      }
-      
-      usedProvider = "Gemini";
-      console.log("Portfolio generated successfully with Gemini, length:", portfolio.length);
-    } catch (geminiError) {
-      const err = geminiError as Error;
-      console.error("Gemini failed with error:", err.message);
-      console.error("Full Gemini error:", geminiError);
-      
-      // Try Groq as fallback
-      try {
-        console.log("Attempting Groq fallback...");
-        portfolio = await generateWithGroq(userInfo);
-        usedProvider = "Groq (Llama 3.3)";
-        console.log("Portfolio generated successfully with Groq, length:", portfolio.length);
-      } catch (groqError) {
-        const err = groqError as Error;
-        console.error("Groq failed with error:", err.message);
-        console.error("Full Groq error:", groqError);
-        
-        // Try Hugging Face as last resort
-        try {
-          console.log("Attempting Hugging Face fallback...");
-          portfolio = await generateWithHuggingFace(userInfo);
-          usedProvider = "Hugging Face (Mixtral)";
-          console.log("Portfolio generated successfully with Hugging Face, length:", portfolio.length);
-        } catch (hfError) {
-          const err = hfError as Error;
-          console.error("Hugging Face failed with error:", err.message);
-          console.error("Full HF error:", hfError);
-          console.error("All AI providers failed");
-          throw new Error("All AI providers are currently unavailable. Please try again later.");
-        }
-      }
+      console.log(`[${jobId}] Using Groq Llama 3.3 70B...`);
+      portfolio = await generateWithGroq(userInfo);
+      usedProvider = "Groq Llama 3.3 70B";
+      console.log(`[${jobId}] Portfolio generated successfully with Groq, length:`, portfolio.length);
+    } catch (groqError) {
+      console.error(`[${jobId}] Groq failed:`, (groqError as Error).message);
+      throw new Error("Portfolio generation failed. Please try again.");
     }
 
     // Validate portfolio content
@@ -259,17 +161,37 @@ Return ONLY the complete HTML code. Make it visually stunning, modern, and profe
     // Clean up the response (remove markdown code blocks if present)
     portfolio = portfolio.replace(/```html\n?/g, "").replace(/```\n?/g, "").trim();
     
-    console.log("Final portfolio length:", portfolio.length);
-    console.log("Portfolio preview:", portfolio.substring(0, 200));
+    console.log(`[${jobId}] Final portfolio length:`, portfolio.length);
+    console.log(`[${jobId}] Portfolio preview:`, portfolio.substring(0, 200));
 
-    return NextResponse.json({ 
-      portfolio,
-      provider: usedProvider 
-    });
+    // Update status to completed
+    if (useDatabase) {
+      try {
+        const { databases } = await createAdminClient();
+        await databases.updateDocument(
+          DATABASE_ID,
+          JOBS_COLLECTION_ID,
+          jobId,
+          {
+            status: 'completed',
+            portfolio,
+            provider: usedProvider,
+            updatedAt: new Date().toISOString()
+          }
+        );
+        console.log(`[${jobId}] Portfolio generation completed successfully with ${usedProvider} (saved to database)`);
+      } catch (dbError) {
+        console.error(`[${jobId}] Failed to update job status in database, falling back to memory:`, dbError);
+        generationStatus.set(jobId, { status: 'completed', portfolio, provider: usedProvider });
+      }
+    } else {
+      generationStatus.set(jobId, { status: 'completed', portfolio, provider: usedProvider });
+      console.log(`[${jobId}] Portfolio generation completed successfully with ${usedProvider} (saved to memory)`);
+    }
   } catch (error: unknown) {
     const err = error as Error & { status?: number; statusText?: string };
-    console.error("Error generating portfolio:", err);
-    console.error("Error details:", {
+    console.error(`[${jobId}] Error generating portfolio:`, err);
+    console.error(`[${jobId}] Error details:`, {
       message: err.message,
       stack: err.stack,
       name: err.name,
@@ -279,28 +201,41 @@ Return ONLY the complete HTML code. Make it visually stunning, modern, and profe
     
     // Provide more specific error messages
     let errorMessage = "Failed to generate portfolio. Please try again.";
-    let statusCode = 500;
     
     if (err.message?.includes("API key") || err.message?.includes("API_KEY")) {
       errorMessage = "Invalid API key. Please check your Gemini API key configuration.";
-      statusCode = 401;
     } else if (err.message?.includes("quota") || err.message?.includes("limit") || err.message?.includes("429")) {
       errorMessage = "API quota exceeded. Please try again later or check your API limits.";
-      statusCode = 429;
     } else if (err.message?.includes("timeout")) {
       errorMessage = "Request timed out. The portfolio generation took too long. Please try with less information.";
-      statusCode = 504;
     } else if (err.message?.includes("ENOTFOUND") || err.message?.includes("ECONNREFUSED") || err.message?.includes("fetch")) {
-      errorMessage = "Unable to connect to Gemini API. Please check if the API is accessible from your network.";
-      statusCode = 503;
+      errorMessage = "Unable to connect to AI service. Please check if the API is accessible.";
     } else if (err.message?.includes("model")) {
-      errorMessage = "Model not available. Please verify your Gemini API access.";
-      statusCode = 400;
+      errorMessage = "Model not available. Please verify your API access.";
+    } else if (err.message) {
+      errorMessage = err.message;
     }
     
-    return NextResponse.json(
-      { error: errorMessage, details: err.message },
-      { status: statusCode }
-    );
+    // Update status to failed
+    if (useDatabase) {
+      try {
+        const { databases } = await createAdminClient();
+        await databases.updateDocument(
+          DATABASE_ID,
+          JOBS_COLLECTION_ID,
+          jobId,
+          {
+            status: 'failed',
+            error: errorMessage,
+            updatedAt: new Date().toISOString()
+          }
+        );
+      } catch (dbError) {
+        console.error(`[${jobId}] Failed to update job status in database, falling back to memory:`, dbError);
+        generationStatus.set(jobId, { status: 'failed', error: errorMessage });
+      }
+    } else {
+      generationStatus.set(jobId, { status: 'failed', error: errorMessage });
+    }
   }
 }
