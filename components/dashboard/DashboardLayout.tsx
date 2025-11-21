@@ -266,11 +266,17 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
           <nav className="flex-1 px-3 py-4 space-y-1">
             {sidebarLinks.map((link) => {
               const Icon = link.icon;
+              const isDisabled = link.label !== "Home";
               return (
                 <a
                   key={link.href}
-                  href={link.href}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[#6B7280] rounded-lg hover:bg-[#F3F4F6] hover:text-[#111827] transition-colors"
+                  href={isDisabled ? undefined : link.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                    isDisabled
+                      ? "text-[#9CA3AF] cursor-not-allowed opacity-60"
+                      : "text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
+                  }`}
+                  onClick={(e) => isDisabled && e.preventDefault()}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{link.label}</span>
