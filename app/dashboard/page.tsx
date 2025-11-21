@@ -13,6 +13,12 @@ export default async function Dashboard() {
     return null;
   }
 
+  // Check if user is verified
+  if (!user.emailVerification) {
+    redirect("/auth/check-email?error=Please+verify+your+email+to+access+the+dashboard");
+    return null;
+  }
+
   // Fetch user's existing portfolio if any
   const existingPortfolio = await getUserPortfolio();
 
