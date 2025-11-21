@@ -206,21 +206,37 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
       });
 
       console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+      
+      // Check if response has content
+      const contentType = response.headers.get("content-type");
+      console.log("Content-Type:", contentType);
+      
+      if (!contentType || !contentType.includes("application/json")) {
+        const textResponse = await response.text();
+        console.error("Non-JSON response:", textResponse);
+        throw new Error(`Server returned non-JSON response: ${textResponse.substring(0, 200)}`);
+      }
+      
       const data = await response.json();
-      console.log("Response data:", data);
+      console.log("Response data received, portfolio length:", data.portfolio?.length);
 
       if (!response.ok) {
         const errorMsg = data.details ? `${data.error}\n\nDetails: ${data.details}` : data.error;
         throw new Error(errorMsg || "Failed to generate portfolio");
       }
+      
+      if (!data.portfolio || data.portfolio.trim().length === 0) {
+        throw new Error("Server returned empty portfolio content");
+      }
 
       setGeneratedPortfolio(data.portfolio);
       addToast({
         title: "Portfolio Generated!",
-        description: "Your portfolio has been created. Review it and click Publish to make it live.",
+        description: `Your portfolio has been created with ${data.provider}. Review it and click Publish to make it live.`,
         variant: "success",
       });
-      console.log("Portfolio generated successfully!");
+      console.log("Portfolio generated successfully with provider:", data.provider);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to generate portfolio. Please try again.";
       console.error("Error generating portfolio:", errorMessage);
