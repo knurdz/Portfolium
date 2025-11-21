@@ -124,67 +124,143 @@ export async function POST(request: NextRequest) {
     // Try Gemini first
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (apiKey) {
-        console.log(`Trying Gemini AI with model: ${selectedModel}...`);
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: selectedModel });
+      if (!apiKey) {
+        throw new Error("GEMINI_API_KEY not configured");
+      }
+      
+      console.log(`Trying Gemini AI with model: ${selectedModel}...`);
+      console.log("API Key exists:", !!apiKey);
+      console.log("User info length:", userInfo.length);
+      
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: selectedModel });
 
-        const prompt = `You are a professional portfolio website generator. Based on the following user information, create a beautiful, modern, and responsive portfolio HTML page.
+      const prompt = `You are an expert web developer and designer specializing in modern, aesthetic portfolio websites. Create a stunning, professional single-page portfolio from the following information.
 
 User Information:
 ${userInfo.substring(0, 500)}${userInfo.length > 500 ? "..." : ""}
 
-Requirements:
-1. Create a complete, single-page HTML portfolio with embedded CSS
-2. Include sections: Hero/Header, About, Skills, Experience, Education, Projects, Contact
-3. Use modern, clean design with a professional color scheme
-4. Make it fully responsive (mobile-friendly)
-5. Include smooth animations and transitions
-6. Use semantic HTML5 elements
-7. Add Font Awesome icons (via CDN) for visual appeal
-8. Use Google Fonts for typography
-9. Ensure the design is visually appealing and professional
-10. Extract and organize all relevant information from the user's data
+CRITICAL REQUIREMENTS:
+1. Create a complete HTML document with <!DOCTYPE html>, <html>, <head>, and <body> tags
+2. DO NOT include <link> or <script> tags for Tailwind CSS, Font Awesome, AOS, or Google Fonts (already loaded in parent app)
+3. Use ONLY inline styles and inline JavaScript - embed all custom CSS in <style> tags in <head>
 
-Return ONLY the complete HTML code, no explanations or markdown code blocks. The HTML should be ready to render directly.`;
+AVAILABLE LIBRARIES (Pre-loaded, just use them):
+- Tailwind CSS: Use utility classes freely (bg-gradient-to-r, backdrop-blur-lg, etc.)
+- Font Awesome 6.5.1: Use <i class="fas fa-icon-name"></i> or <i class="fab fa-icon-name"></i>
+- AOS (Animate On Scroll): Add data-aos="fade-up" or data-aos="zoom-in" to elements
+- Google Fonts: Inter (body), Poppins (headings), Playfair Display (accents)
 
-        const result = await Promise.race([
-          model.generateContent(prompt),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error("Request timeout")), 60000)
-          )
-        ]);
-        
-        const response = result.response;
-        portfolio = response.text();
-        usedProvider = "Gemini";
-        console.log("Portfolio generated successfully with Gemini");
+MODERN DESIGN REQUIREMENTS:
+Color Scheme:
+- Use vibrant gradients: bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400
+- Glassmorphism effects: backdrop-blur-lg bg-white/10 border border-white/20
+- Dark mode friendly colors
+
+Layout & Sections:
+1. Hero Section: Full-screen with gradient background, animated gradient text, professional photo placeholder
+2. About: Glassmorphism card with personality, use grid layout
+3. Skills: Grid of animated skill cards with Font Awesome icons and visual proficiency bars
+4. Experience: Modern timeline with hover effects and company icons
+5. Projects: Card grid with image placeholders, hover lift effects, and action buttons
+6. Education: Timeline or modern card layout with icons
+7. Contact: Floating contact section with social icons and links
+
+Styling Guidelines:
+- Typography: font-['Inter'] for body, font-['Poppins'] for headings
+- Spacing: Use generous padding (py-20, px-8, space-y-12)
+- Shadows: shadow-2xl, shadow-purple-500/20
+- Borders: rounded-2xl, rounded-3xl
+- Transitions: transition-all duration-500 ease-in-out
+- Hover effects: hover:scale-105, hover:shadow-2xl
+- Responsive: sm:, md:, lg:, xl: breakpoints
+
+Modern Features:
+- Gradient text: bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent
+- Floating elements: animate-bounce, animate-pulse
+- Smooth scroll: Add smooth scroll behavior
+- Interactive buttons: Gradient backgrounds with hover effects
+- Skill bars: Animated progress bars with percentages
+- Cards: 3D hover effects using transform
+
+Animation:
+- Add data-aos="fade-up" to all major sections
+- Use data-aos-delay="100", "200", "300" for staggered animations
+- Add custom CSS animations for gradient backgrounds
+
+Responsive Design:
+- Mobile-first approach
+- Stack sections on mobile, grid on desktop
+- Hide/show elements based on screen size
+- Touch-friendly buttons and links
+
+Return ONLY the complete HTML code. Make it visually stunning, modern, and professional.`;
+
+      console.log("Sending request to Gemini...");
+      const result = await Promise.race([
+        model.generateContent(prompt),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error("Request timeout after 60s")), 60000)
+        )
+      ]);
+      
+      console.log("Received response from Gemini");
+      const response = result.response;
+      
+      if (!response) {
+        throw new Error("Empty response from Gemini");
       }
+      
+      portfolio = response.text();
+      
+      if (!portfolio || portfolio.trim().length === 0) {
+        throw new Error("Gemini returned empty portfolio content");
+      }
+      
+      usedProvider = "Gemini";
+      console.log("Portfolio generated successfully with Gemini, length:", portfolio.length);
     } catch (geminiError) {
-      console.log("Gemini failed, trying Groq...", geminiError);
+      const err = geminiError as Error;
+      console.error("Gemini failed with error:", err.message);
+      console.error("Full Gemini error:", geminiError);
       
       // Try Groq as fallback
       try {
+        console.log("Attempting Groq fallback...");
         portfolio = await generateWithGroq(userInfo);
         usedProvider = "Groq (Llama 3.3)";
-        console.log("Portfolio generated successfully with Groq");
+        console.log("Portfolio generated successfully with Groq, length:", portfolio.length);
       } catch (groqError) {
-        console.log("Groq failed, trying Hugging Face...", groqError);
+        const err = groqError as Error;
+        console.error("Groq failed with error:", err.message);
+        console.error("Full Groq error:", groqError);
         
         // Try Hugging Face as last resort
         try {
+          console.log("Attempting Hugging Face fallback...");
           portfolio = await generateWithHuggingFace(userInfo);
           usedProvider = "Hugging Face (Mixtral)";
-          console.log("Portfolio generated successfully with Hugging Face");
-        } catch {
+          console.log("Portfolio generated successfully with Hugging Face, length:", portfolio.length);
+        } catch (hfError) {
+          const err = hfError as Error;
+          console.error("Hugging Face failed with error:", err.message);
+          console.error("Full HF error:", hfError);
           console.error("All AI providers failed");
           throw new Error("All AI providers are currently unavailable. Please try again later.");
         }
       }
     }
 
+    // Validate portfolio content
+    if (!portfolio || portfolio.trim().length === 0) {
+      throw new Error("Generated portfolio is empty");
+    }
+
     // Clean up the response (remove markdown code blocks if present)
     portfolio = portfolio.replace(/```html\n?/g, "").replace(/```\n?/g, "").trim();
+    
+    console.log("Final portfolio length:", portfolio.length);
+    console.log("Portfolio preview:", portfolio.substring(0, 200));
 
     return NextResponse.json({ 
       portfolio,
