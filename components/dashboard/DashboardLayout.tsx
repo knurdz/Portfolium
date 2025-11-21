@@ -59,7 +59,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
   const [subdomainAvailable, setSubdomainAvailable] = useState<boolean | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [portfolioUrl, setPortfolioUrl] = useState(
-    existingPortfolio ? `https://${existingPortfolio.subdomain}.portfolium.knurdz.org` : ""
+    existingPortfolio ? `https://${existingPortfolio.subdomain}.portfolio.knurdz.org` : ""
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const subdomainCheckTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -158,7 +158,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
       setPortfolioUrl(data.url);
       addToast({
         title: "Portfolio Published!",
-        description: `Your portfolio is now live at ${subdomain}.portfolium.knurdz.org`,
+        description: `Your portfolio is now live at ${subdomain}.portfolio.knurdz.org`,
         variant: "success",
         duration: 7000,
       });
@@ -380,7 +380,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
                     )}
                   </div>
                   <p className="text-xs text-[#6B7280]">
-                    Your portfolio will be at: <span className="font-mono font-medium">{subdomain || "yourname"}.portfolium.knurdz.org</span>
+                    Your portfolio will be at: <span className="font-mono font-medium">{subdomain || "yourname"}.portfolio.knurdz.org</span>
                   </p>
                   {subdomainError && (
                     <p className="text-xs text-red-600">{subdomainError}</p>

@@ -9,7 +9,17 @@ export async function createSessionClient() {
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
 
-  const session = (await cookies()).get("appwrite-session");
+  const cookieStore = await cookies();
+  
+  // Try the standard session cookie name first
+  let session = cookieStore.get("appwrite-session");
+  
+  // If not found, try the Appwrite browser SDK cookie format
+  if (!session || !session.value) {
+    const sessionCookieName = `a_session_${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`;
+    session = cookieStore.get(sessionCookieName);
+  }
+  
   if (!session || !session.value) {
     throw new Error("No session");
   }
