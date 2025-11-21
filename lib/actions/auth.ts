@@ -165,8 +165,12 @@ export async function signOut() {
 }
 
 export async function signInWithOAuth(provider: string): Promise<never> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const successUrl = `${appUrl}/oauth`;
+  const failureUrl = `${appUrl}/auth/signin?error=OAuth+cancelled`;
+  
   redirect(
-    `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/account/sessions/oauth2/${provider}?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}&success=${process.env.NEXT_PUBLIC_APP_URL}/oauth&failure=${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=OAuth+cancelled`
+    `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/account/sessions/oauth2/${provider}?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}&success=${encodeURIComponent(successUrl)}&failure=${encodeURIComponent(failureUrl)}`
   );
 }
 

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Client, Account } from "node-appwrite";
 
 export async function GET(request: Request) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
 
   try {
     // Create a client to check the session
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
     if (!appwriteSessionCookie) {
       console.error("No Appwrite session cookie found");
-      return NextResponse.redirect(new URL("/auth/signin?error=Missing+credentials", request.url));
+      return NextResponse.redirect(new URL("/auth/signin?error=Missing+credentials", baseUrl));
     }
 
     // Set the session in the client
@@ -40,9 +41,9 @@ export async function GET(request: Request) {
       secure: true,
     });
 
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard", baseUrl));
   } catch (error) {
     console.error("OAuth error:", error);
-    return NextResponse.redirect(new URL("/auth/signin?error=OAuth+authentication+failed", request.url));
+    return NextResponse.redirect(new URL("/auth/signin?error=OAuth+authentication+failed", baseUrl));
   }
 }
