@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes grid {
+  0% { transform: translateY(-50px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4rem; }
+}
