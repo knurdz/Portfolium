@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateJobId, generationStatus } from "./storage";
 import { createAdminClient, DATABASE_ID, JOBS_COLLECTION_ID } from "@/lib/appwrite";
+import { PORTFOLIO_TEMPLATES } from "@/lib/templates";
 
 // Fallback function using OpenAI-compatible API (Groq is free and fast)
-async function generateWithGroq(userInfo: string) {
+async function generateWithGroq(userInfo: string, templateId?: string) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error("GROQ_API_KEY not configured");
   }
+
+  const template = templateId && PORTFOLIO_TEMPLATES[templateId as keyof typeof PORTFOLIO_TEMPLATES] 
+    ? PORTFOLIO_TEMPLATES[templateId as keyof typeof PORTFOLIO_TEMPLATES] 
+    : null;
+
+  const templatePrompt = template ? `\n\nSpecific Style Requirements (${template.name}):\n${template.systemPrompt}` : "";
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -41,7 +48,7 @@ Requirements:
 9. Ensure the design is visually appealing and professional
 10. Extract and organize all relevant information from the user's data
 
-Return ONLY the complete HTML code, no explanations or markdown code blocks. The HTML should be ready to render directly.`
+Return ONLY the complete HTML code, no explanations or markdown code blocks. The HTML should be ready to render directly.${templatePrompt}`
         }
       ],
       temperature: 0.7,
@@ -65,6 +72,7 @@ export async function POST(request: NextRequest) {
     const details = formData.get("details") as string;
     const cvFile = formData.get("cv") as File | null;
     const selectedModel = formData.get("model") as string || "gemini-2.5-flash";
+    const template = formData.get("template") as string || "";
 
     let userInfo = details || "";
 
@@ -117,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Start async generation (don't await)
-    generatePortfolioAsync(jobId, userInfo, selectedModel, useDatabase);
+    generatePortfolioAsync(jobId, userInfo, selectedModel, useDatabase, template);
 
     // Return job ID immediately
     return NextResponse.json({ 
@@ -135,8 +143,9 @@ export async function POST(request: NextRequest) {
 }
 
 // Async generation function
-async function generatePortfolioAsync(jobId: string, userInfo: string, selectedModel: string, useDatabase: boolean = true) {
+async function generatePortfolioAsync(jobId: string, userInfo: string, selectedModel: string, useDatabase: boolean = true, templateId?: string) {
   console.log(`[${jobId}] Starting portfolio generation with Groq using ${useDatabase ? 'database' : 'in-memory'} storage...`);
+  if (templateId) console.log(`[${jobId}] Requested template: ${templateId}`);
   
   try {
     let portfolio = "";
@@ -145,8 +154,8 @@ async function generatePortfolioAsync(jobId: string, userInfo: string, selectedM
     // Use Groq for generation
     try {
       console.log(`[${jobId}] Using Groq Llama 3.3 70B...`);
-      portfolio = await generateWithGroq(userInfo);
-      usedProvider = "Groq Llama 3.3 70B";
+      portfolio = await generateWithGroq(userInfo, templateId);
+      usedProvider = `Groq Llama 3.3 70B (${templateId || 'Default'})`;
       console.log(`[${jobId}] Portfolio generated successfully with Groq, length:`, portfolio.length);
     } catch (groqError) {
       console.error(`[${jobId}] Groq failed:`, (groqError as Error).message);

@@ -1,520 +1,321 @@
+"use client";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sparkles,
-  Wand2,
-  LayoutTemplate,
-  Upload,
-  MousePointerClick,
-  Palette,
+import { ThemeToggle } from "@/components/theme-toggle";
+import { 
+  Layers, 
+  Sparkles, 
+  Orbit, 
+  Rocket, 
   Zap,
-  CheckCircle2,
-  Star,
-  ArrowRight,
 } from "lucide-react";
 
+const FillButton = ({ href, children, isPrimary = false, className = "" }: { href: string; children: React.ReactNode; isPrimary?: boolean; className?: string }) => (
+  <Link 
+    href={href} 
+    className={`group relative inline-flex items-center justify-center overflow-hidden rounded-xl border px-8 font-medium transition-colors ${ 
+      isPrimary 
+        ? "border-violet-600 text-violet-700 dark:text-violet-400 dark:border-violet-500" 
+        : "border-border text-foreground hover:border-foreground/50" 
+    } ${className} h-12`}
+  >
+    <span className="absolute inset-0 -z-10 flex h-full w-full items-center justify-center">
+      <span className={`absolute h-full w-0 transition-all duration-300 ease-out group-hover:w-full ${ 
+        isPrimary ? "bg-violet-500 dark:bg-violet-600" : "bg-foreground"
+      }`} />
+    </span>
+    <span className={`relative z-10 transition-colors duration-300 flex items-center gap-2 ${
+      isPrimary ? "group-hover:text-white" : "group-hover:text-background"
+    }`}>
+      {children}
+    </span>
+  </Link>
+);
+
 export default function Home() {
+  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
-      <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB] bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60">
-        <div className="container flex h-16 items-center justify-between mx-auto px-4 max-w-7xl">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-xl text-[#111827]">Portfolium</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm font-medium text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-              Features
-            </Link>
-            <Link href="#templates" className="text-sm font-medium text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-              Templates
-            </Link>
-            <Link href="#pricing" className="text-sm font-medium text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-              Pricing
-            </Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/auth/signin">
-              <Button variant="outline" className="border-[#D1D5DB] hover:bg-[#F9FAFB]">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button className="bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="relative min-h-[100dvh] text-foreground flex flex-col font-sans selection:bg-violet-500/30 overflow-x-hidden">
+      {/* 3D Perspective Neon Grid Background */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none w-full h-[100vh] opacity-50 dark:opacity-60 overflow-hidden"
+        style={{ perspective: '800px' }}
+      >
+        <div 
+          className="absolute w-[200vw] h-[150vh] left-[-50vw] bottom-0 origin-bottom"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(139, 92, 246, 0.4) 2px, transparent 2px),
+              linear-gradient(to top, rgba(139, 92, 246, 0.4) 2px, transparent 2px)
+            `,
+            backgroundSize: '4rem 4rem',
+            transform: 'rotateX(75deg)',
+            maskImage: 'linear-gradient(to top, black 5%, transparent 70%)',
+            WebkitMaskImage: 'linear-gradient(to top, black 5%, transparent 70%)',
+            animation: 'grid-move 10s linear infinite'
+          }}
+        />
+        {/* Subtle horizon glow */}
+        <div className="absolute inset-0 bg-gradient-to-t from-violet-500/10 via-transparent to-transparent pointer-events-none z-0 mix-blend-screen" />
+      </div>
 
-      <section className="relative overflow-hidden bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] py-20 sm:py-32">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#4F46E5]/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#0EA5E9]/10 rounded-full blur-3xl"></div>
-        </div>
-        <div className="container mx-auto px-4 max-w-7xl relative z-10">
-          <div className="text-center max-w-4xl mx-auto space-y-8">
-            <Badge variant="outline" className="border-[#4F46E5] text-[#4F46E5] bg-white/50 backdrop-blur">
-              ✨ AI-Powered Portfolio Builder
-            </Badge>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#111827] tracking-tight leading-tight">
-              Build Your Portfolio <br className="hidden sm:block" />
-              <span className="bg-linear-to-r from-[#4F46E5] to-[#0EA5E9] bg-clip-text text-transparent">
-                in Minutes
-              </span>
-            </h1>
-            <p className="text-xl text-[#6B7280] max-w-2xl mx-auto leading-relaxed">
-              AI-powered creator tools to help you craft a stunning professional portfolio. No design skills required.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/auth/signup">
-                <Button size="lg" className="bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white h-12 px-8 text-base shadow-lg">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="#templates">
-                <Button size="lg" variant="outline" className="border-[#D1D5DB] hover:bg-white h-12 px-8 text-base">
-                  See Templates
-                </Button>
+      {/* HEADER */}
+      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 w-full pointer-events-none">
+        <header className="w-full max-w-5xl rounded-full border border-violet-500/30 dark:border-white/10 bg-background/60 backdrop-blur-xl shadow-[0_0_15px_rgba(139,92,246,0.15)] dark:shadow-none pointer-events-auto transition-all duration-300">
+          <div className="px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
+            {/* Logo */}
+            <Link href="#" onClick={scrollToTop} className="flex items-center gap-3">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-md shadow-violet-500/20">
+                <Layers className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <span className="font-bold text-lg md:text-xl tracking-tight text-foreground">Portfolium</span>
+            </Link>
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1 px-2 py-1 rounded-full bg-muted/40 border border-violet-500/30 dark:border-white/10 shadow-[0_0_15px_rgba(139,92,246,0.15)] dark:shadow-none">
+              <Link href="#features" className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">Features</Link>
+              <Link href="#templates" className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">Templates</Link>
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="scale-90 md:scale-100">
+                <ThemeToggle />
+              </div>
+              <Link 
+                href="/auth/signin" 
+                className="text-sm font-semibold px-4 md:px-5 py-2 rounded-full bg-foreground text-background hover:bg-violet-600 hover:scale-105 active:scale-95 transition-all shadow-sm"
+              >
+                Log in
               </Link>
             </div>
-            <div className="pt-8">
-              <div className="relative max-w-3xl mx-auto">
-                <div className="aspect-video bg-linear-to-br from-white to-[#EEF2FF] rounded-2xl shadow-2xl border border-[#D1D5DB] flex items-center justify-center">
-                  <div className="text-center space-y-3">
-                    <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center mx-auto">
-                      <Sparkles className="w-8 h-8 text-white" />
+          </div>
+        </header>
+      </div>
+
+      {/* HERO SECTION - Left Box Split */}
+      <main className="flex-1 mt-16 md:mt-20">
+        <section className="relative pt-20 pb-32 overflow-hidden">
+          {/* Ambient Background Glow (No Grid) */}
+          <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
+            {/* Ambient glow centers */}
+            <div className="absolute top-1/4 left-1/3 -translate-x-1/2 w-[600px] h-[600px] bg-violet-500/15 dark:bg-violet-500/20 rounded-full pointer-events-none blur-[100px]" />
+            <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] bg-purple-500/15 dark:bg-purple-500/20 rounded-full pointer-events-none blur-[100px]" />
+          </div>
+
+          <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Side: Name and Description */}
+            <div className="flex flex-col items-start text-left space-y-8 z-10 w-full">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300 text-sm font-medium">
+                <Sparkles className="w-4 h-4" /> Portfolium 2.0 is live
+              </div>
+              <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1]">
+                Developer Portfolios, Built Differently.
+              </h1>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                Stop wrestling with CSS. We instantly generate, customize, and deploy stunning developer portfolios with zero design skills required.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <FillButton href="/auth/signup" isPrimary={true}>
+                  Start Building Free
+                </FillButton>
+                <FillButton href="#features">
+                  Explore Features
+                </FillButton>
+              </div>
+              
+              <div className="flex items-center gap-4 pt-8 text-sm text-muted-foreground font-medium">
+                <div className="flex -space-x-2">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center overflow-hidden">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i * 15}`} alt="user" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-[#6B7280] font-medium">Portfolio Preview</p>
+                  ))}
+                  <div className="w-8 h-8 rounded-full bg-border border-2 border-background flex items-center justify-center text-xs">+</div>
+                </div>
+                <span>Joined by 1,000+ developers</span>
+              </div>
+            </div>
+
+            {/* Right Side: Visual Graphic Content */}
+            <div className="relative w-full h-[500px] hidden lg:block z-10 lg:pl-10">
+              {/* Backdrop Mockup Window */}
+                <div className="absolute top-4 right-0 w-[90%] h-[420px] bg-card border border-violet-500/30 dark:border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.15)] dark:shadow-2xl rounded-2xl overflow-hidden">
+                <div className="h-12 border-b border-border bg-muted/30 flex items-center px-4 justify-between">
+                   <div className="flex gap-2">
+                     <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                     <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                     <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                   </div>
+                   <div className="text-xs text-muted-foreground font-mono opacity-60">portfolium.sh/app</div>
+                </div>
+                {/* Mockup Body Content */}
+                <div className="p-8 h-full bg-gradient-to-br from-card to-muted/20 animate-[pulse_4s_ease-in-out_infinite]">
+                  <div className="flex items-start gap-6">
+                    <div className="w-24 h-24 rounded-2xl bg-muted border border-border flex shrink-0 items-center justify-center overflow-hidden shadow-inner">
+                       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Main" alt="avatar" className="w-full h-full object-cover"/>
+                    </div>
+                    <div className="flex-1 space-y-4 pt-1">
+                      <div className="w-2/3 h-5 bg-muted rounded"></div>
+                      <div className="w-1/2 h-3 bg-muted/50 rounded"></div>
+                      <div className="flex gap-2 pt-2">
+                        <div className="w-16 h-6 bg-violet-500/10 rounded border border-violet-500/20"></div>
+                        <div className="w-16 h-6 bg-violet-500/10 rounded border border-violet-500/20"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-10">
+                     <div className="h-28 bg-background rounded-xl border border-border/50 shadow-sm p-4 flex flex-col justify-end space-y-2">
+                         <div className="w-8 h-8 rounded bg-muted"></div>
+                         <div className="w-3/4 h-3 bg-muted/80 rounded"></div>
+                     </div>
+                     <div className="h-28 bg-background rounded-xl border border-border/50 shadow-sm p-4 flex flex-col justify-end space-y-2">
+                         <div className="w-8 h-8 rounded bg-muted"></div>
+                         <div className="w-3/4 h-3 bg-muted/80 rounded"></div>
+                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Overlapping Floating Element */}
+                <div className="absolute bottom-8 left-0 w-[300px] p-6 bg-background/90 backdrop-blur-xl border border-violet-500/30 dark:border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.15)] dark:shadow-xl rounded-2xl transform transition-transform hover:-translate-y-2 duration-500">
+                 <div className="flex items-center gap-4 mb-5">
+                   <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-500">
+                     <Orbit className="w-6 h-6" />
+                   </div>
+                   <div>
+                     <div className="text-sm font-bold">Theme Successfully Applied</div>
+                     <div className="text-xs text-muted-foreground mt-1">Minimalist Developer UI</div>
+                   </div>
+                 </div>
+                 <div className="flex gap-2">
+                    <div className="flex-1 h-9 bg-violet-600 rounded-lg flex items-center justify-center text-white text-xs font-semibold shadow-md">
+                      Live Preview ✓
+                    </div>
+                 </div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="features" className="py-20 bg-white">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl font-bold text-[#111827] mb-4">Everything You Need</h2>
-            <p className="text-lg text-[#6B7280]">
-              Powerful features to create, customize, and publish your portfolio in minutes
-            </p>
+        {/* Section Spacer */}
+        <div className="h-32 md:h-48 relative z-0"></div>
+
+        {/* FEATURES SECTION */}
+        <section id="features" className="py-24 bg-background relative z-10 border-y border-border scroll-m-20">
+          <div className="container mx-auto px-6">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Everything you need to stand out</h2>
+              <p className="text-lg text-muted-foreground">Focus on your shipping and coding. We automate the presentation so you can show off your best work.</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                { icon: <Layers className="w-6 h-6" />, title: "Beautiful Templates", desc: "Choose from dozens of professionally designed themes. Customize colors and typography instantly." },
+                { icon: <Zap className="w-6 h-6" />, title: "Lightning Fast", desc: "Static generation and global edge caching ensures your portfolio loads instantly anywhere." },
+                { icon: <Rocket className="w-6 h-6" />, title: "Custom Domains", desc: "Bring your own domain or use our free .portfolium subdomain. SSL certificates included by default." },
+              ].map((feature) => (
+                <div key={feature.title} className="group p-8 rounded-3xl border border-border bg-card/50 hover:bg-card hover:border-violet-500/30 transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-[#E5E7EB] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 space-y-4">
-                <div className="w-12 h-12 bg-[#EEF2FF] rounded-xl flex items-center justify-center">
-                  <Wand2 className="w-6 h-6 text-[#4F46E5]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827]">AI Portfolio Builder</h3>
-                <p className="text-[#6B7280]">
-                  Build your portfolio from a simple prompt. Our AI creates a personalized layout just for you.
-                </p>
-              </CardContent>
-            </Card>
+        </section>
 
-            <Card className="border-[#E5E7EB] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 space-y-4">
-                <div className="w-12 h-12 bg-[#DBEAFE] rounded-xl flex items-center justify-center">
-                  <LayoutTemplate className="w-6 h-6 text-[#0EA5E9]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827]">Start With Templates</h3>
-                <p className="text-[#6B7280]">
-                  Choose from dozens of modern, professionally designed templates tailored to your industry.
-                </p>
-              </CardContent>
-            </Card>
+        {/* Section Spacer */}
+        <div className="h-32 md:h-48 relative z-0"></div>
 
-            <Card className="border-[#E5E7EB] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 space-y-4">
-                <div className="w-12 h-12 bg-[#FEF3C7] rounded-xl flex items-center justify-center">
-                  <Upload className="w-6 h-6 text-[#F59E0B]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827]">Upload Your CV</h3>
-                <p className="text-[#6B7280]">
-                  Upload your existing CV and watch as our AI automatically generates portfolio sections.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#E5E7EB] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 space-y-4">
-                <div className="w-12 h-12 bg-[#F3E8FF] rounded-xl flex items-center justify-center">
-                  <MousePointerClick className="w-6 h-6 text-[#9333EA]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827]">Full Drag-and-Drop Editing</h3>
-                <p className="text-[#6B7280]">
-                  Intuitive visual editor lets you drag, drop, and customize every element with ease.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#E5E7EB] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 space-y-4">
-                <div className="w-12 h-12 bg-[#FEE2E2] rounded-xl flex items-center justify-center">
-                  <Palette className="w-6 h-6 text-[#EF4444]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827]">Custom Sections & Themes</h3>
-                <p className="text-[#6B7280]">
-                  Add custom sections, choose color themes, and personalize fonts to match your brand.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#E5E7EB] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 space-y-4">
-                <div className="w-12 h-12 bg-[#D1FAE5] rounded-xl flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-[#10B981]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827]">Publish With One Click</h3>
-                <p className="text-[#6B7280]">
-                  Deploy your portfolio instantly with a custom domain or shareable link. No hosting needed.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-[#F9FAFB]">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl font-bold text-[#111827] mb-4">How It Works</h2>
-            <p className="text-lg text-[#6B7280]">Three simple steps to your perfect portfolio</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                <span className="text-2xl font-bold text-white">1</span>
+        {/* TEMPLATES SECTION */}
+        <section id="templates" className="py-24 bg-background relative z-10 scroll-m-20 border-y border-border">
+          <div className="container mx-auto px-6">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+              <div className="max-w-2xl">
+                <h2 className="text-3xl lg:text-4xl font-bold mb-4">Curated Designer Themes</h2>
+                <p className="text-lg text-muted-foreground">Start with a stunning template designed for conversion. Switch them with a single click without rebuilding your data.</p>
               </div>
-              <h3 className="text-xl font-semibold text-[#111827]">Choose or Upload</h3>
-              <p className="text-[#6B7280]">
-                Select a template that fits your style or upload your existing CV to get started instantly.
+              <FillButton href="/auth/signup" className="shrink-0 h-10 px-6">
+                Browse All
+              </FillButton>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { name: "Animated Modern", cat: "Creative & Interactive", img: "/templates/animated.png" },
+                { name: "Software Engineer", cat: "Teck & Development", img: "/templates/developer.png" },
+                { name: "3D Perspective", cat: "Innovative Design", img: "/templates/3d.png" },
+              ].map((theme) => (
+                <div key={theme.name} className="group relative rounded-3xl overflow-hidden border border-border bg-card hover:border-violet-500/30 transition-all duration-300">
+                   <div className={`aspect-[16/10] relative overflow-hidden border-b border-border`}>
+                      <img 
+                        src={theme.img} 
+                        alt={theme.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute top-4 right-4 px-3 py-1 bg-background/80 backdrop-blur rounded-full text-xs font-semibold">
+                         Free
+                      </div>
+                   </div>
+                   <div className="p-6">
+                      <h3 className="font-bold text-lg mb-1">{theme.name}</h3>
+                      <p className="text-sm text-muted-foreground">{theme.cat}</p>
+                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Section Spacer */}
+        <div className="h-32 md:h-48 relative z-0"></div>
+
+      </main>
+
+      {/* FOOTER */}
+      <footer className="border-t border-border bg-background relative overflow-hidden">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex flex-col-reverse md:flex-row justify-between items-center gap-6">
+            
+            {/* Left Side: Navigation Links & Copyright */}
+            <div className="flex flex-col items-center md:items-start gap-3 w-full md:w-auto">
+              <nav className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground w-full">
+                <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
+                <Link href="#templates" className="hover:text-foreground transition-colors">Templates</Link>
+              </nav>
+              <p className="text-xs text-muted-foreground">
+                © {new Date().getFullYear()} Portfolium. All rights reserved.
               </p>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-linear-to-br from-[#0EA5E9] to-[#38BDF8] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                <span className="text-2xl font-bold text-white">2</span>
-              </div>
-              <h3 className="text-xl font-semibold text-[#111827]">Customize with AI</h3>
-              <p className="text-[#6B7280]">
-                Use our AI tools and drag-and-drop editor to personalize content, colors, and layout.
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-linear-to-br from-[#10B981] to-[#34D399] rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                <span className="text-2xl font-bold text-white">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-[#111827]">Publish & Share</h3>
-              <p className="text-[#6B7280]">
-                Publish your portfolio with one click and share your unique link with the world.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="templates" className="py-20 bg-white">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl font-bold text-[#111827] mb-4">Beautiful Templates</h2>
-            <p className="text-lg text-[#6B7280]">
-              Professional designs crafted for every industry and style
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="border-[#E5E7EB] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-                <div className="aspect-[3/4] bg-linear-to-br from-[#EEF2FF] to-[#E0E7FF] flex items-center justify-center relative">
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
-                  <div className="text-center space-y-2">
-                    <LayoutTemplate className="w-12 h-12 text-[#4F46E5] mx-auto" />
-                    <p className="text-sm font-medium text-[#6B7280]">Template {i}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-          <div className="text-center">
-            <Button size="lg" variant="outline" className="border-[#4F46E5] text-[#4F46E5] hover:bg-[#EEF2FF]">
-              View All Templates
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-[#F9FAFB]">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl font-bold text-[#111827] mb-4">Loved by Creators</h2>
-            <p className="text-lg text-[#6B7280]">
-              Join thousands of professionals showcasing their work
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-[#E5E7EB]">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
-                  ))}
-                </div>
-                <p className="text-[#6B7280] italic">
-                  &quot;Portfolium made it so easy to create a professional portfolio. The AI suggestions were spot on!&quot;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-[#111827]">Sarah Johnson</p>
-                    <p className="text-sm text-[#6B7280]">UX Designer</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#E5E7EB]">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
-                  ))}
-                </div>
-                <p className="text-[#6B7280] italic">
-                  &quot;I went from CV to published portfolio in under 10 minutes. Game changer for job hunting!&quot;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-linear-to-br from-[#0EA5E9] to-[#38BDF8] rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-[#111827]">Michael Chen</p>
-                    <p className="text-sm text-[#6B7280]">Software Engineer</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#E5E7EB]">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
-                  ))}
-                </div>
-                <p className="text-[#6B7280] italic">
-                  &quot;The templates are beautiful and the customization options are endless. Highly recommend!&quot;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-linear-to-br from-[#10B981] to-[#34D399] rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-[#111827]">Emily Rodriguez</p>
-                    <p className="text-sm text-[#6B7280]">Marketing Manager</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section id="pricing" className="py-20 bg-white">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl font-bold text-[#111827] mb-4">Simple Pricing</h2>
-            <p className="text-lg text-[#6B7280]">
-              Start free and upgrade as you grow
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border-[#E5E7EB]">
-              <CardContent className="p-8 space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-[#111827] mb-2">Free</h3>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-[#111827]">$0</span>
-                    <span className="text-[#6B7280]">/month</span>
-                  </div>
-                </div>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#10B981] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">1 Portfolio</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#10B981] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Basic Templates</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#10B981] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">AI Assistant</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#10B981] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Portfolium Subdomain</span>
-                  </li>
-                </ul>
-                <Button variant="outline" className="w-full border-[#D1D5DB] hover:bg-[#F9FAFB]">
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#4F46E5] border-2 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-linear-to-r from-[#4F46E5] to-[#6366F1] text-white border-0">
-                  Most Popular
-                </Badge>
-              </div>
-              <CardContent className="p-8 space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-[#111827] mb-2">Pro</h3>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-[#111827]">$12</span>
-                    <span className="text-[#6B7280]">/month</span>
-                  </div>
-                </div>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Unlimited Portfolios</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Premium Templates</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Advanced AI Features</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Custom Domain</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Analytics Dashboard</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#6B7280]">Priority Support</span>
-                  </li>
-                </ul>
-                <Button className="w-full bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white">
-                  Upgrade to Pro
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-linear-to-br from-[#4F46E5] to-[#6366F1] text-white">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold">Start building your portfolio today</h2>
-            <p className="text-xl text-white/90">
-              Join thousands of professionals who trust Portfolium to showcase their work
-            </p>
-            <Link href="/auth/signup">
-              <Button size="lg" className="bg-white text-[#4F46E5] hover:bg-white/90 h-12 px-8 text-base shadow-lg">
-                Get Started — It&apos;s Free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-white border-t border-[#E5E7EB] py-12">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="space-y-4">
+            {/* Right Side: Logo & Powered By */}
+            <div className="flex flex-col items-center md:items-end gap-2 w-full md:w-auto">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
+                <span className="font-bold text-lg tracking-tight">Portfolium</span>
+                <div className="w-6 h-6 rounded-lg bg-violet-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/20">
+                  <Layers className="w-3 h-3" />
                 </div>
-                <span className="font-bold text-xl text-[#111827]">Portfolium</span>
               </div>
-              <p className="text-sm text-[#6B7280]">
-                AI-powered portfolio builder for professionals
-              </p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/50 bg-muted/30 text-xs font-medium text-muted-foreground">
+                Powered by <Zap className="w-3 h-3 text-amber-500 fill-amber-500" /> 
+                <Link href="https://knurdz.org/" target="_blank" className="text-foreground hover:text-violet-500 transition-colors">Knurdz</Link>
+              </div>
             </div>
-            <div>
-              <h4 className="font-semibold text-[#111827] mb-4">Product</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#features" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#templates" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Templates
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#pricing" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Pricing
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-[#111827] mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="#" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Careers
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-[#111827] mb-4">Account</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/auth/signin" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Sign In
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/auth/signup" className="text-sm text-[#6B7280] hover:text-[#4F46E5] transition-colors">
-                    Sign Up
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-8 border-t border-[#E5E7EB] text-center">
-            <p className="text-sm text-[#6B7280]">
-              © 2025 Portfolium. All rights reserved.
-            </p>
+            
           </div>
         </div>
       </footer>
+
     </div>
   );
 }
