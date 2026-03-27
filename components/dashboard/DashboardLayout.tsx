@@ -32,6 +32,7 @@ interface User {
 
 interface DashboardLayoutProps {
   user: User;
+  children?: React.ReactNode;
   existingPortfolio?: {
     subdomain: string;
     htmlContent: string;
@@ -45,7 +46,7 @@ const sidebarLinks = [
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
-export default function DashboardLayout({ user, existingPortfolio }: DashboardLayoutProps) {
+export default function DashboardLayout({ user, existingPortfolio, children }: DashboardLayoutProps) {
   const { addToast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userDetails, setUserDetails] = useState("");
@@ -342,7 +343,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
           <nav className="flex-1 px-3 py-4 space-y-1">
             {sidebarLinks.map((link) => {
               const Icon = link.icon;
-              const isDisabled = link.label !== "Home";
+              const isDisabled = link.label !== "Home" && link.label !== "Conversations";
               return (
                 <a
                   key={link.href}
@@ -401,11 +402,14 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
           >
             <Menu className="w-5 h-5" />
           </Button>
-          <h1 className="text-xl font-bold text-[#111827]">Portfolio Generator</h1>
+          <h1 className="text-xl font-bold text-[#111827]">
+            {children ? "AI Conversations" : "Portfolio Generator"}
+          </h1>
         </header>
 
-        {/* Main Area */}
-        <main className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
+        {children || (
+          /* Main Area */
+          <main className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
           {/* Input Section */}
           <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-[#E5E7EB] flex flex-col bg-white lg:overflow-y-auto">
             <div className="p-6 border-b border-[#E5E7EB]">
@@ -630,6 +634,7 @@ export default function DashboardLayout({ user, existingPortfolio }: DashboardLa
             </div>
           </div>
         </main>
+        )}
       </div>
     </div>
   );

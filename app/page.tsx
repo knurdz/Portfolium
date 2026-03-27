@@ -4,12 +4,10 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { 
   Layers, 
-  Globe, 
-  Zap, 
-  CheckCircle2,
-  Code2,
-  Sparkles,
-  LayoutTemplate
+  Sparkles, 
+  Orbit, 
+  Rocket, 
+  Zap,
 } from "lucide-react";
 
 const FillButton = ({ href, children, isPrimary = false, className = "" }: { href: string; children: React.ReactNode; isPrimary?: boolean; className?: string }) => (
@@ -84,7 +82,6 @@ export default function Home() {
             <nav className="hidden md:flex items-center gap-1 px-2 py-1 rounded-full bg-muted/40 border border-violet-500/30 dark:border-white/10 shadow-[0_0_15px_rgba(139,92,246,0.15)] dark:shadow-none">
               <Link href="#features" className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">Features</Link>
               <Link href="#templates" className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">Templates</Link>
-              <Link href="#pricing" className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">Pricing</Link>
             </nav>
 
             {/* Actions */}
@@ -191,7 +188,7 @@ export default function Home() {
                 <div className="absolute bottom-8 left-0 w-[300px] p-6 bg-background/90 backdrop-blur-xl border border-violet-500/30 dark:border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.15)] dark:shadow-xl rounded-2xl transform transition-transform hover:-translate-y-2 duration-500">
                  <div className="flex items-center gap-4 mb-5">
                    <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-500">
-                     <Code2 className="w-6 h-6" />
+                     <Orbit className="w-6 h-6" />
                    </div>
                    <div>
                      <div className="text-sm font-bold">Theme Successfully Applied</div>
@@ -223,9 +220,9 @@ export default function Home() {
               {[
                 { icon: <Layers className="w-6 h-6" />, title: "Beautiful Templates", desc: "Choose from dozens of professionally designed themes. Customize colors and typography instantly." },
                 { icon: <Zap className="w-6 h-6" />, title: "Lightning Fast", desc: "Static generation and global edge caching ensures your portfolio loads instantly anywhere." },
-                { icon: <Globe className="w-6 h-6" />, title: "Custom Domains", desc: "Bring your own domain or use our free .portfolium subdomain. SSL certificates included by default." },
-              ].map((feature, idx) => (
-                <div key={idx} className="bg-card border border-border rounded-3xl p-8 hover:shadow-xl hover:border-violet-500/30 transition-all duration-300 group">
+                { icon: <Rocket className="w-6 h-6" />, title: "Custom Domains", desc: "Bring your own domain or use our free .portfolium subdomain. SSL certificates included by default." },
+              ].map((feature) => (
+                <div key={feature.title} className="group p-8 rounded-3xl border border-border bg-card/50 hover:bg-card hover:border-violet-500/30 transition-all duration-300">
                   <div className="w-14 h-14 rounded-2xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     {feature.icon}
                   </div>
@@ -255,24 +252,19 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { name: "Minimalist Developer", cat: "Software Engineering", color: "from-violet-500/20 to-fuchsia-500/20", icon: "violet" },
-                { name: "Creative Director", cat: "Design & Product", color: "from-emerald-500/20 to-teal-500/20", icon: "emerald" },
-                { name: "Executive Noir", cat: "Leadership & Management", color: "from-zinc-500/20 to-stone-500/20", icon: "zinc" },
-              ].map((theme, i) => (
-                <div key={i} className="group relative rounded-3xl overflow-hidden border border-border bg-card hover:border-violet-500/30 transition-all duration-300">
-                   <div className={`aspect-[16/10] bg-gradient-to-br ${theme.color} relative p-6 flex flex-col justify-between border-b border-border`}>
-                      <div className="flex justify-between items-start">
-                         <div className="w-10 h-10 rounded-full bg-background/80 backdrop-blur flex items-center justify-center shadow-sm">
-                           <LayoutTemplate className={`w-5 h-5 text-${theme.icon}-500`} />
-                         </div>
-                         <div className="px-3 py-1 bg-background/80 backdrop-blur rounded-full text-xs font-semibold">
-                            Pro
-                         </div>
-                      </div>
-                      <div className="space-y-2 w-3/4">
-                         <div className="h-4 bg-background/50 rounded w-full"></div>
-                         <div className="h-3 bg-background/50 rounded w-5/6"></div>
-                         <div className="h-3 bg-background/50 rounded w-4/6"></div>
+                { name: "Animated Modern", cat: "Creative & Interactive", img: "/templates/animated.png" },
+                { name: "Software Engineer", cat: "Teck & Development", img: "/templates/developer.png" },
+                { name: "3D Perspective", cat: "Innovative Design", img: "/templates/3d.png" },
+              ].map((theme) => (
+                <div key={theme.name} className="group relative rounded-3xl overflow-hidden border border-border bg-card hover:border-violet-500/30 transition-all duration-300">
+                   <div className={`aspect-[16/10] relative overflow-hidden border-b border-border`}>
+                      <img 
+                        src={theme.img} 
+                        alt={theme.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute top-4 right-4 px-3 py-1 bg-background/80 backdrop-blur rounded-full text-xs font-semibold">
+                         Free
                       </div>
                    </div>
                    <div className="p-6">
@@ -288,65 +280,6 @@ export default function Home() {
         {/* Section Spacer */}
         <div className="h-32 md:h-48 relative z-0"></div>
 
-        {/* PRICING SECTION */}
-        <section id="pricing" className="py-24 bg-white dark:bg-background relative z-10 border-t border-border scroll-m-20">
-          <div className="container mx-auto px-6 max-w-5xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Simple, transparent pricing</h2>
-              <p className="text-lg text-muted-foreground">Start for free, upgrade when you need more power.</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Free Card */}
-                <div className="group relative border border-border bg-card rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-500 z-0">
-                  <div className="absolute inset-0 rounded-[1.4rem] overflow-hidden -z-10">
-                    <div className="absolute inset-0 bg-violet-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2 transition-colors">Hobbyist</h3>
-                <div className="text-5xl font-extrabold mb-6">$0<span className="text-lg text-muted-foreground font-medium">/mo</span></div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-muted-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-foreground/50"/> 1 Portfolio Site
-                  </li>
-                  <li className="flex items-center gap-3 text-muted-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-foreground/50"/> Basic Templates
-                  </li>
-                  <li className="flex items-center gap-3 text-muted-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-foreground/50"/> .portfolium.io subdomain
-                  </li>
-                </ul>
-                <FillButton href="/auth/signup" className="w-full">Get Started Free</FillButton>
-              </div>
-
-              {/* Pro Card */}
-                <div className="group relative border-2 border-violet-500 bg-card rounded-3xl p-10 shadow-2xl z-0 transition-all duration-500 hover:shadow-violet-500/20">
-                  <div className="absolute inset-0 rounded-[1.4rem] overflow-hidden -z-10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                  </div>
-                  <div className="absolute top-0 right-10 -translate-y-1/2 bg-violet-500 text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg z-10">
-                    Most Popular
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2 transition-colors">Professional</h3>
-                <div className="text-5xl font-extrabold mb-6">$12<span className="text-lg text-muted-foreground font-medium">/mo</span></div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-violet-500"/> Unlimited Portfolio Sites
-                  </li>
-                  <li className="flex items-center gap-3 text-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-violet-500"/> Premium Templates
-                  </li>
-                  <li className="flex items-center gap-3 text-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-violet-500"/> Custom Root Domain (CNAME)
-                  </li>
-                  <li className="flex items-center gap-3 text-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-violet-500"/> Analytics Dashboard
-                  </li>
-                </ul>
-                <FillButton href="/auth/signup" isPrimary={true} className="w-full">Upgrade to Pro</FillButton>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* FOOTER */}
@@ -359,7 +292,6 @@ export default function Home() {
               <nav className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground w-full">
                 <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
                 <Link href="#templates" className="hover:text-foreground transition-colors">Templates</Link>
-                <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
               </nav>
               <p className="text-xs text-muted-foreground">
                 © {new Date().getFullYear()} Portfolium. All rights reserved.

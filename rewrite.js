@@ -35,9 +35,6 @@ export default function Home() {
             <Link href="#templates" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Templates
             </Link>
-            <Link href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </Link>
           </nav>
           <div className="flex items-center gap-3">
             <ThemeToggle />
