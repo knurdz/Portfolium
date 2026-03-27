@@ -29,42 +29,42 @@ function SignInForm() {
   const [state, formAction, isPending] = useActionState(signIn, null);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#F9FAFB] via-[#EEF2FF] to-[#E0E7FF] px-4 py-6">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-6 relative overflow-hidden">
       {/* Subtle Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#4F46E5]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#0EA5E9]/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
       </div>
 
-      <Card className="w-full max-w-[440px] shadow-xl border-[#D1D5DB] bg-white/95 backdrop-blur-sm relative z-10">
+      <Card className="w-full max-w-[440px] shadow-xl border-border bg-card/95 backdrop-blur-sm relative z-10">
         <CardHeader className="space-y-2 text-center pb-5">
           {/* Logo/Brand */}
           <div className="flex justify-center mb-1">
-            <Link href="/" className="w-12 h-12 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-              <Sparkles className="w-6 h-6 text-white" />
+            <Link href="/" className="w-12 h-12 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <Sparkles className="w-6 h-6 text-primary-foreground" />
             </Link>
           </div>
-          <CardTitle className="text-2xl font-bold text-[#111827] tracking-tight">
+          <CardTitle className="text-2xl font-bold text-foreground tracking-tight">
             Welcome back
           </CardTitle>
-          <CardDescription className="text-sm text-[#6B7280]">
+          <CardDescription className="text-sm text-muted-foreground">
             Sign in to your Portfolium account
           </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-4 px-6 pb-6">
           {successMessage && (
-            <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-green-600 leading-relaxed">
+            <div className="flex items-start gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-green-500 leading-relaxed">
                 {decodeURIComponent(successMessage)}
               </p>
             </div>
           )}
           {(state?.error || urlError) && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-red-600 leading-relaxed">
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+              <p className="text-xs text-destructive leading-relaxed">
                 {state?.error || decodeURIComponent(urlError || "")}
               </p>
             </div>
@@ -72,17 +72,17 @@ function SignInForm() {
           <form action={formAction} className="space-y-4">
           {/* Email Input */}
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm font-medium text-[#111827]">
+            <Label htmlFor="email" className="text-sm font-medium text-foreground">
               Email address
             </Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 name="email"
                 type="email"
                 placeholder="you@example.com"
-                className="h-11 pl-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
+                className="h-11 pl-10 border-input focus-visible:ring-primary focus-visible:ring-2 focus-visible:border-primary transition-all placeholder:text-muted-foreground/50"
               />
             </div>
           </div>
@@ -90,29 +90,29 @@ function SignInForm() {
           {/* Password Input */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-sm font-medium text-[#111827]">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
                 Password
               </Label>
               <Link
                 href="/auth/forgot-password"
-                className="text-xs text-[#4F46E5] hover:text-[#3730A3] transition-colors hover:underline"
+                className="text-xs text-primary hover:text-primary/80 transition-colors hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="h-11 pl-10 pr-10 border-[#D1D5DB] focus-visible:ring-[#6366F1] focus-visible:ring-2 focus-visible:border-[#6366F1] transition-all placeholder:text-gray-400"
+                className="h-11 pl-10 pr-10 border-input focus-visible:ring-primary focus-visible:ring-2 focus-visible:border-primary transition-all placeholder:text-muted-foreground/50"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#4F46E5] transition-colors focus:outline-none focus:text-[#4F46E5]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none focus:text-primary"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -130,11 +130,11 @@ function SignInForm() {
               id="remember"
               checked={rememberMe}
               onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              className="data-[state=checked]:bg-[#4F46E5] data-[state=checked]:border-[#4F46E5]"
+              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
             />
             <label
               htmlFor="remember"
-              className="text-sm text-[#6B7280] cursor-pointer select-none"
+              className="text-sm text-muted-foreground cursor-pointer select-none"
             >
               Remember me for 30 days
             </label>
@@ -144,7 +144,7 @@ function SignInForm() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-11 bg-linear-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#3730A3] hover:to-[#4F46E5] text-white font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+            className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
           >
             {isPending ? "Signing in..." : "Sign in"}
           </Button>
@@ -153,10 +153,10 @@ function SignInForm() {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[#E5E7EB]" />
+              <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-[#6B7280] font-medium">or continue with</span>
+              <span className="bg-card px-3 text-muted-foreground font-medium">or continue with</span>
             </div>
           </div>
 
@@ -166,12 +166,12 @@ function SignInForm() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="w-full h-10 border-input hover:bg-accent hover:border-primary transition-all"
               onClick={() => {
                 account.createOAuth2Session({
                   provider: OAuthProvider.Google,
-                  success: `${window.location.origin}/dashboard`,
-                  failure: `${window.location.origin}/auth/signin?error=OAuth+cancelled`
+                  success: `${globalThis.location.origin}/dashboard`,
+                  failure: `${globalThis.location.origin}/auth/signin?error=OAuth+cancelled`
                 });
               }}
             >
@@ -204,12 +204,12 @@ function SignInForm() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-10 border-[#D1D5DB] hover:bg-[#F9FAFB] hover:border-[#4F46E5] transition-all"
+              className="w-full h-10 border-input hover:bg-accent hover:border-primary transition-all"
               onClick={() => {
                 account.createOAuth2Session({
                   provider: OAuthProvider.Github,
-                  success: `${window.location.origin}/dashboard`,
-                  failure: `${window.location.origin}/auth/signin?error=OAuth+cancelled`
+                  success: `${globalThis.location.origin}/dashboard`,
+                  failure: `${globalThis.location.origin}/auth/signin?error=OAuth+cancelled`
                 });
               }}
             >
@@ -231,10 +231,10 @@ function SignInForm() {
 
           {/* Sign Up Link */}
           <div className="text-center text-sm pt-1">
-            <span className="text-[#6B7280]">Don&apos;t have an account? </span>
+            <span className="text-muted-foreground">Don&apos;t have an account? </span>
             <Link
               href="/auth/signup"
-              className="font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors hover:underline"
+              className="font-semibold text-primary hover:text-primary/80 transition-colors hover:underline"
             >
               Sign up →
             </Link>

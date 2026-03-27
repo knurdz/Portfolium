@@ -31,11 +31,11 @@ interface User {
 }
 
 interface DashboardLayoutProps {
-  user: User;
-  children?: React.ReactNode;
-  existingPortfolio?: {
-    subdomain: string;
-    htmlContent: string;
+  readonly user: User;
+  readonly children?: React.ReactNode;
+  readonly existingPortfolio?: {
+    readonly subdomain: string;
+    readonly htmlContent: string;
   } | null;
 }
 
@@ -100,7 +100,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
   };
 
   const handleSubdomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const value = e.target.value.toLowerCase().replaceAll(/[^a-z0-9-]/g, "");
     setSubdomain(value);
     setSubdomainAvailable(null);
     setSubdomainError("");
@@ -226,73 +226,59 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
       const maxAttempts = 60; // Max 2 minutes (60 * 2s = 120s)
       let attempts = 0;
 
-      const poll = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          const checkStatus = async () => {
-            attempts++;
+      const checkJobStatus = async () => {
+        const statusResponse = await fetch(`/api/generate-portfolio/status?jobId=${jobId}`);
+        
+        if (statusResponse.status === 404) {
+          throw new Error("Generation job not found. Please try again.");
+        }
+        
+        if (!statusResponse.ok) {
+          if (attempts >= maxAttempts) {
+            const errorData = await statusResponse.json().catch(() => ({ error: "Unknown error" }));
+            throw new Error(errorData.error || "Failed to check generation status");
+          }
+          return null;
+        }
+
+        return await statusResponse.json();
+      };
+
+      const poll = async () => {
+        while (attempts < maxAttempts) {
+          attempts++;
+          setGeneratingStatus(`Generating your portfolio... (${Math.floor(attempts * 2)}s)`);
+
+          try {
+            const status = await checkJobStatus();
             
-            if (attempts > maxAttempts) {
-              reject(new Error("Portfolio generation timed out. Please try again."));
+            if (!status) {
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+              continue;
+            }
+
+            if (status.status === 'completed') {
+              setGeneratingStatus("Finalizing your portfolio...");
+              setGeneratedPortfolio(status.portfolio);
+              addToast({
+                title: "Portfolio Generated!",
+                description: `Your portfolio has been created with ${status.provider}. Review it and click Publish to make it live.`,
+                variant: "success",
+              });
               return;
+            } 
+            
+            if (status.status === 'failed') {
+              throw new Error(status.error || "Portfolio generation failed");
             }
-
-            setGeneratingStatus(`Generating your portfolio... (${Math.floor(attempts * 2)}s)`);
-
-            try {
-              const statusResponse = await fetch(`/api/generate-portfolio/status?jobId=${jobId}`);
-              
-              if (statusResponse.status === 404) {
-                // Job not found - might have been cleaned up or never existed
-                console.error("Job not found:", jobId);
-                reject(new Error("Generation job not found. Please try again."));
-                return;
-              }
-              
-              if (!statusResponse.ok) {
-                const errorData = await statusResponse.json().catch(() => ({ error: "Unknown error" }));
-                console.error("Status check failed:", errorData);
-                // Don't fail immediately on status check errors, retry
-                if (attempts >= maxAttempts) {
-                  reject(new Error(errorData.error || "Failed to check generation status"));
-                  return;
-                }
-                setTimeout(checkStatus, pollInterval);
-                return;
-              }
-
-              const status = await statusResponse.json();
-              console.log(`Poll attempt ${attempts}:`, status.status);
-
-              if (status.status === 'completed') {
-                setGeneratingStatus("Finalizing your portfolio...");
-                setGeneratedPortfolio(status.portfolio);
-                addToast({
-                  title: "Portfolio Generated!",
-                  description: `Your portfolio has been created with ${status.provider}. Review it and click Publish to make it live.`,
-                  variant: "success",
-                });
-                console.log("Portfolio generated successfully with provider:", status.provider);
-                resolve();
-              } else if (status.status === 'failed') {
-                reject(new Error(status.error || "Portfolio generation failed"));
-              } else {
-                // Still processing, poll again
-                setTimeout(checkStatus, pollInterval);
-              }
-            } catch (pollError) {
-              // If polling fails, log and retry (unless max attempts reached)
-              console.error("Poll error:", pollError);
-              if (attempts >= maxAttempts) {
-                reject(pollError);
-                return;
-              }
-              // Retry after interval
-              setTimeout(checkStatus, pollInterval);
-            }
-          };
-
-          checkStatus();
-        });
+            
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+          } catch (pollError) {
+            if (attempts >= maxAttempts) throw pollError;
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+          }
+        }
+        throw new Error("Portfolio generation timed out. Please try again.");
       };
 
       // Start polling
@@ -344,16 +330,26 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
             {sidebarLinks.map((link) => {
               const Icon = link.icon;
               const isDisabled = link.label !== "Home" && link.label !== "Conversations";
+              const classNames = `flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                isDisabled
+                  ? "text-[#9CA3AF] cursor-not-allowed opacity-60"
+                  : "text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
+              }`;
+
+              if (isDisabled) {
+                return (
+                  <div key={link.href} className={classNames}>
+                    <Icon className="w-5 h-5" />
+                    <span>{link.label}</span>
+                  </div>
+                );
+              }
+
               return (
                 <a
                   key={link.href}
-                  href={isDisabled ? undefined : link.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                    isDisabled
-                      ? "text-[#9CA3AF] cursor-not-allowed opacity-60"
-                      : "text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
-                  }`}
-                  onClick={(e) => isDisabled && e.preventDefault()}
+                  href={link.href}
+                  className={classNames}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{link.label}</span>
@@ -384,8 +380,10 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
 
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden cursor-default"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -603,34 +601,44 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
             </div>
             
             <div className="flex-1 lg:overflow-y-auto p-6">
-              {!generatedPortfolio && !isGenerating ? (
-                <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                  <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-                    <Eye className="w-8 h-8 text-white" />
+              {(() => {
+                if (!generatedPortfolio && !isGenerating) {
+                  return (
+                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                      <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                        <Eye className="w-8 h-8 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[#111827] mb-2">
+                        Your Portfolio Preview
+                      </h3>
+                      <p className="text-[#6B7280] max-w-md">
+                        Fill in your details or upload your CV, then click &quot;Generate Portfolio&quot; to see your personalized portfolio page here.
+                      </p>
+                    </div>
+                  );
+                }
+                
+                if (isGenerating) {
+                  return (
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <Loader2 className="w-12 h-12 text-[#4F46E5] animate-spin mb-4" />
+                      <p className="text-[#4F46E5] font-medium mb-2">{generatingStatus || "Generating your portfolio with AI..."}</p>
+                      <p className="text-[#6B7280] text-sm">This may take up to 2 minutes. Please wait...</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="bg-white rounded-lg shadow-sm border border-[#E5E7EB] overflow-hidden">
+                    <iframe
+                      srcDoc={generatedPortfolio}
+                      className="w-full h-[600px] border-0"
+                      title="Portfolio Preview"
+                      sandbox="allow-same-origin"
+                    />
                   </div>
-                  <h3 className="text-xl font-bold text-[#111827] mb-2">
-                    Your Portfolio Preview
-                  </h3>
-                  <p className="text-[#6B7280] max-w-md">
-                    Fill in your details or upload your CV, then click &quot;Generate Portfolio&quot; to see your personalized portfolio page here.
-                  </p>
-                </div>
-              ) : isGenerating ? (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <Loader2 className="w-12 h-12 text-[#4F46E5] animate-spin mb-4" />
-                  <p className="text-[#4F46E5] font-medium mb-2">{generatingStatus || "Generating your portfolio with AI..."}</p>
-                  <p className="text-[#6B7280] text-sm">This may take up to 2 minutes. Please wait...</p>
-                </div>
-              ) : (
-                <div className="bg-white rounded-lg shadow-sm border border-[#E5E7EB] overflow-hidden">
-                  <iframe
-                    srcDoc={generatedPortfolio}
-                    className="w-full h-[600px] border-0"
-                    title="Portfolio Preview"
-                    sandbox="allow-same-origin"
-                  />
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         </main>
