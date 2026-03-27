@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, AlertCircle, Sparkles } from "lucide-react";
 import { Suspense } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function CheckEmailContent() {
   const searchParams = useSearchParams();
@@ -11,6 +12,11 @@ function CheckEmailContent() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-background relative overflow-hidden">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Subtle Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>

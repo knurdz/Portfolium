@@ -209,7 +209,7 @@ export default function Home() {
         <div className="h-32 md:h-48 relative z-0"></div>
 
         {/* FEATURES SECTION */}
-        <section id="features" className="py-24 bg-white dark:bg-background relative z-10 border-y border-border scroll-m-20">
+        <section id="features" className="py-24 bg-background relative z-10 border-y border-border scroll-m-20">
           <div className="container mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold mb-4">Everything you need to stand out</h2>
@@ -238,7 +238,7 @@ export default function Home() {
         <div className="h-32 md:h-48 relative z-0"></div>
 
         {/* TEMPLATES SECTION */}
-        <section id="templates" className="py-24 bg-white dark:bg-background relative z-10 scroll-m-20 border-y border-border">
+        <section id="templates" className="py-24 bg-background relative z-10 scroll-m-20 border-y border-border">
           <div className="container mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
               <div className="max-w-2xl">

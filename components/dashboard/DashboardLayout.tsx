@@ -23,6 +23,7 @@ import {
   Save,
 } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface User {
   name: string;
@@ -304,21 +305,21 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
   };
 
   return (
-    <div className="flex h-screen bg-[#F9FAFB]">
+    <div className="flex h-screen bg-background text-foreground transition-colors duration-300">
       {/* Sidebar */}
       <aside
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#E5E7EB] transition-transform duration-300 lg:translate-x-0 lg:static`}
+        } fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transition-transform duration-300 lg:translate-x-0 lg:static`}
       >
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E7EB]">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-lg flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 bg-linear-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md">
+                <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold text-[#111827]">Portfolium</span>
+              <span className="text-lg font-bold text-foreground">Portfolium</span>
             </div>
             <Button
               variant="ghost"
@@ -326,7 +327,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
               className="lg:hidden"
               onClick={() => setSidebarOpen(false)}
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
 
@@ -337,8 +338,8 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
               const isDisabled = link.label !== "Home" && link.label !== "Conversations";
               const classNames = `flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
                 isDisabled
-                  ? "text-[#9CA3AF] cursor-not-allowed opacity-60"
-                  : "text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]"
+                  ? "text-muted-foreground/50 cursor-not-allowed opacity-60"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`;
 
               if (isDisabled) {
@@ -364,16 +365,16 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
           </nav>
 
           {/* User Info & Logout */}
-          <div className="p-4 border-t border-[#E5E7EB]">
-            <div className="px-3 py-2 mb-2 bg-[#F9FAFB] rounded-lg">
-              <p className="text-sm font-medium text-[#111827] truncate">{user.name}</p>
-              <p className="text-xs text-[#6B7280] truncate">{user.email}</p>
+          <div className="p-4 border-t border-border">
+            <div className="px-3 py-2 mb-2 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             </div>
             <form action={signOut}>
               <Button
                 type="submit"
                 variant="ghost"
-                className="w-full justify-start gap-3 text-[#EF4444] hover:text-[#DC2626] hover:bg-red-50"
+                className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Sign Out</span>
@@ -396,28 +397,32 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-[#E5E7EB] px-4 lg:px-6 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-bold text-[#111827]">
-            {children ? "AI Conversations" : "Portfolio Generator"}
-          </h1>
+        <header className="bg-card border-b border-border px-4 lg:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-bold text-foreground">
+              {children ? "AI Conversations" : "Portfolio Generator"}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+          </div>
         </header>
 
         {children || (
-          /* Main Area */
           <main className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
           {/* Input Section */}
-          <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-[#E5E7EB] flex flex-col bg-white lg:overflow-y-auto">
-            <div className="p-6 border-b border-[#E5E7EB]">
-              <h2 className="text-lg font-semibold text-[#111827] mb-2">Your Information</h2>
-              <p className="text-sm text-[#6B7280]">
+          <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-border flex flex-col bg-card lg:overflow-y-auto">
+            <div className="p-6 border-b border-border">
+              <h2 className="text-lg font-semibold text-foreground mb-2">Your Information</h2>
+              <p className="text-sm text-muted-foreground">
                 Enter your details or upload your CV to generate a portfolio page
               </p>
             </div>
@@ -426,7 +431,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
               <form onSubmit={handleGeneratePortfolio} className="space-y-6">
                 {/* Model Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="model" className="text-sm font-medium text-[#111827]">
+                  <Label htmlFor="model" className="text-sm font-medium text-foreground">
                     AI Model
                   </Label>
                   <select
@@ -434,18 +439,18 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
                     disabled={isGenerating}
-                    className="w-full h-10 px-3 rounded-md border border-[#D1D5DB] text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="groq">Groq Llama 3.3 70B</option>
                   </select>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-muted-foreground">
                     Fast & high-quality AI portfolio generation
                   </p>
                 </div>
 
                 {/* Subdomain Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="subdomain" className="text-sm font-medium text-[#111827]">
+                  <Label htmlFor="subdomain" className="text-sm font-medium text-foreground">
                     Choose Your Subdomain
                   </Label>
                   <div className="flex items-center gap-2">
@@ -455,31 +460,31 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                       value={subdomain}
                       onChange={handleSubdomainChange}
                       placeholder="johndoe"
-                      className="flex-1 placeholder:text-gray-400"
+                      className="flex-1 placeholder:text-muted-foreground/50 bg-background"
                       disabled={!!existingPortfolio || isGenerating}
                     />
                     {isCheckingSubdomain && (
-                      <Loader2 className="w-5 h-5 text-[#6B7280] animate-spin" />
+                      <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                     )}
                     {subdomainAvailable === true && (
                       <Check className="w-5 h-5 text-green-600" />
                     )}
                     {subdomainAvailable === false && subdomain.length >= 3 && (
-                      <X className="w-5 h-5 text-red-600" />
+                      <X className="w-5 h-5 text-destructive" />
                     )}
                   </div>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-muted-foreground">
                     Your portfolio will be at: <span className="font-mono font-medium">{subdomain || "yourname"}.portfolio.knurdz.org</span>
                   </p>
                   {subdomainError && (
-                    <p className="text-xs text-red-600">{subdomainError}</p>
+                    <p className="text-xs text-destructive">{subdomainError}</p>
                   )}
                   {portfolioUrl && (
                     <a
                       href={portfolioUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[#4F46E5] hover:underline flex items-center gap-1"
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
                     >
                       View your live portfolio <ExternalLink className="w-3 h-3" />
                     </a>
@@ -488,7 +493,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
 
                 {/* Text Input for Details */}
                 <div className="space-y-2">
-                  <Label htmlFor="details" className="text-sm font-medium text-[#111827]">
+                  <Label htmlFor="details" className="text-sm font-medium text-foreground">
                     Enter Your Details
                   </Label>
                   <Textarea
@@ -496,7 +501,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                     value={userDetails}
                     onChange={(e) => setUserDetails(e.target.value)}
                     placeholder="Tell us about yourself... Include:&#10;• Full Name&#10;• Professional Title&#10;• Skills & Expertise&#10;• Work Experience&#10;• Education&#10;• Projects&#10;• Contact Information&#10;• Social Media Links"
-                    className="min-h-[300px] text-sm placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-h-[300px] text-sm placeholder:text-muted-foreground/50 bg-background disabled:opacity-50 disabled:cursor-not-allowed"
                     rows={12}
                     disabled={isGenerating}
                   />
@@ -505,16 +510,16 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                 {/* Divider */}
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-[#E5E7EB]" />
+                    <span className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-white px-2 text-[#6B7280]">OR</span>
+                    <span className="bg-card px-2 text-muted-foreground">OR</span>
                   </div>
                 </div>
 
                 {/* File Upload */}
                 <div className="space-y-2">
-                  <Label htmlFor="cv" className="text-sm font-medium text-[#111827]">
+                  <Label htmlFor="cv" className="text-sm font-medium text-foreground">
                     Upload Your CV/Resume
                   </Label>
                   <div className="flex items-center gap-2">
@@ -530,7 +535,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                       type="button"
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex-1"
+                      className="flex-1 bg-background"
                       disabled={isGenerating}
                     >
                       <Upload className="w-4 h-4 mr-2" />
@@ -550,7 +555,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="text-xs text-muted-foreground">
                     Supported formats: PDF, DOC, DOCX, TXT
                   </p>
                 </div>
@@ -559,7 +564,7 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                 <Button
                   type="submit"
                   disabled={(!userDetails.trim() && !cvFile) || isGenerating}
-                  className="w-full h-11 bg-[#4F46E5] hover:bg-[#3730A3] text-white font-semibold"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                 >
                   {isGenerating ? (
                     <>
@@ -600,9 +605,9 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
           </div>
 
           {/* Preview Section */}
-          <div className="w-full lg:w-1/2 flex flex-col bg-[#F9FAFB] lg:overflow-hidden">
-            <div className="p-6 border-b border-[#E5E7EB] bg-white flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#111827]">Preview</h2>
+          <div className="w-full lg:w-1/2 flex flex-col bg-muted/30 lg:overflow-hidden">
+            <div className="p-6 border-b border-border bg-card flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">Preview</h2>
             </div>
             
             <div className="flex-1 lg:overflow-y-auto p-6">
@@ -610,13 +615,13 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                 if (!generatedPortfolio && !isGenerating) {
                   return (
                     <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                      <div className="w-16 h-16 bg-linear-to-br from-[#4F46E5] to-[#6366F1] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-                        <Eye className="w-8 h-8 text-white" />
+                      <div className="w-16 h-16 bg-linear-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                        <Eye className="w-8 h-8 text-primary-foreground" />
                       </div>
-                      <h3 className="text-xl font-bold text-[#111827] mb-2">
+                      <h3 className="text-xl font-bold text-foreground mb-2">
                         Your Portfolio Preview
                       </h3>
-                      <p className="text-[#6B7280] max-w-md">
+                      <p className="text-muted-foreground max-w-md">
                         Fill in your details or upload your CV, then click &quot;Generate Portfolio&quot; to see your personalized portfolio page here.
                       </p>
                     </div>
@@ -626,15 +631,15 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
                 if (isGenerating) {
                   return (
                     <div className="flex flex-col items-center justify-center h-full">
-                      <Loader2 className="w-12 h-12 text-[#4F46E5] animate-spin mb-4" />
-                      <p className="text-[#4F46E5] font-medium mb-2">{generatingStatus || "Generating your portfolio with AI..."}</p>
-                      <p className="text-[#6B7280] text-sm">This may take up to 2 minutes. Please wait...</p>
+                      <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                      <p className="text-primary font-medium mb-2">{generatingStatus || "Generating your portfolio with AI..."}</p>
+                      <p className="text-muted-foreground text-sm">This may take up to 2 minutes. Please wait...</p>
                     </div>
                   );
                 }
 
                 return (
-                  <div className="bg-white rounded-lg shadow-sm border border-[#E5E7EB] overflow-hidden">
+                  <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
                     <iframe
                       srcDoc={generatedPortfolio}
                       className="w-full h-[600px] border-0"

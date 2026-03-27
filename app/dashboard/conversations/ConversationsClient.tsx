@@ -157,7 +157,7 @@ export default function ConversationsPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" ref={scrollRef}>
         {messages.map((message) => (
           <div
@@ -172,31 +172,31 @@ export default function ConversationsPage() {
               }`}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                message.role === "user" ? "bg-violet-100 text-violet-600" : "bg-indigo-100 text-indigo-600"
+                message.role === "user" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent-foreground"
               }`}>
                 {message.role === "user" ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
               </div>
               <div className={`rounded-2xl p-4 ${
                 message.role === "user" 
-                  ? "bg-violet-600 text-white shadow-md shadow-violet-200" 
-                  : "bg-slate-50 text-slate-900 border border-slate-100"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                  : "bg-muted text-foreground border border-border"
               }`}>
                 <p className="text-sm leading-relaxed">{message.content}</p>
                 
                 {message.type === "portfolio_preview" && message.portfolioHtml && (
-                  <div className="mt-4 p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between gap-4">
+                  <div className="mt-4 p-3 bg-background rounded-xl border border-border flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center shadow-sm">
+                      <div className="w-10 h-10 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center shadow-sm">
                         <Sparkles className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-900">Portfolio Ready</p>
-                        <p className="text-[10px] text-slate-500 line-clamp-1">Review and publish in dashboard</p>
+                        <p className="text-xs font-bold text-foreground">Portfolio Ready</p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-1">Review and publish in dashboard</p>
                       </div>
                     </div>
                     <Button 
                       size="sm" 
-                      className="h-8 bg-indigo-600 hover:bg-indigo-700 shadow-sm"
+                      className="h-8 bg-primary hover:bg-primary/90 shadow-sm"
                       onClick={() => {
                         globalThis.location.href = "/dashboard";
                       }}
@@ -217,9 +217,9 @@ export default function ConversationsPage() {
               <button
                 key={tmpl.id}
                 onClick={() => handleGenerate(tmpl.id)}
-                className="text-left rounded-xl border border-slate-200 hover:border-violet-500 hover:ring-1 hover:ring-violet-500 transition-all bg-white group shadow-xs overflow-hidden flex flex-col"
+                className="text-left rounded-xl border border-border hover:border-primary hover:ring-1 hover:ring-primary transition-all bg-card group shadow-xs overflow-hidden flex flex-col"
               >
-                <div className="aspect-video w-full relative bg-slate-100 overflow-hidden">
+                <div className="aspect-video w-full relative bg-muted overflow-hidden">
                   <Image 
                     src={tmpl.imagePath} 
                     alt={tmpl.name}
@@ -228,8 +228,8 @@ export default function ConversationsPage() {
                   />
                 </div>
                 <div className="p-4">
-                  <h4 className="text-sm font-bold text-slate-900">{tmpl.name}</h4>
-                  <p className="text-xs text-slate-500">{tmpl.description}</p>
+                  <h4 className="text-sm font-bold text-foreground">{tmpl.name}</h4>
+                  <p className="text-xs text-muted-foreground">{tmpl.description}</p>
                 </div>
               </button>
             ))}
@@ -238,29 +238,29 @@ export default function ConversationsPage() {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-slate-50 border border-slate-100 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
-              <span className="text-xs font-medium text-slate-500">AI is crafting your response...</span>
+            <div className="bg-muted border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+              <Loader2 className="w-4 h-4 text-primary animate-spin" />
+              <span className="text-xs font-medium text-muted-foreground">AI is crafting your response...</span>
             </div>
           </div>
         )}
       </div>
 
-      <div className="p-4 md:p-6 border-t border-slate-100 bg-slate-50/50">
+      <div className="p-4 md:p-6 border-t border-border bg-muted/30">
         <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-2">
           <Input 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tell me more about yourself or your skills..."
-            className="h-12 rounded-xl focus-visible:ring-violet-500 border-slate-200 bg-white"
+            className="h-12 rounded-xl focus-visible:ring-primary border-border bg-card text-foreground"
             disabled={isLoading}
           />
           <Button 
             type="submit" 
             disabled={!input.trim() || isLoading}
-            className="w-12 h-12 rounded-xl bg-violet-600 hover:bg-violet-700 shrink-0 shadow-lg shadow-violet-200 transition-transform active:scale-95"
+            className="w-12 h-12 rounded-xl bg-primary hover:bg-primary/90 shrink-0 shadow-lg shadow-primary/20 transition-transform active:scale-95"
           >
-            <Send className="w-5 h-5 text-white" />
+            <Send className="w-5 h-5 text-primary-foreground" />
           </Button>
         </form>
       </div>

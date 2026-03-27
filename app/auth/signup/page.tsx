@@ -17,6 +17,7 @@ import { Eye, EyeOff, Mail, Lock, Sparkles, User, CheckCircle2, XCircle, AlertCi
 
 import { signUp } from "@/lib/actions/auth";
 import { account, OAuthProvider } from "@/lib/appwrite-client";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function OAuthButtons({ onSignIn }: { readonly onSignIn: (p: OAuthProvider) => void }) {
   return (
@@ -374,6 +375,11 @@ function SignUpForm() {
 export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Subtle Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
