@@ -55,7 +55,10 @@ export async function GET(request: NextRequest) {
       }
       
       console.log(`[Status Check] Job ${jobId} not found in database or memory`);
-      console.log(`[Status Check] Available jobs in memory:`, Array.from(generationStatus.keys()));
+      console.log(`[Status Check] Current memory job count: ${generationStatus.size}`);
+      if (generationStatus.size > 0) {
+        console.log(`[Status Check] Available jobs in memory:`, Array.from(generationStatus.keys()).slice(0, 5));
+      }
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
   } catch (error) {

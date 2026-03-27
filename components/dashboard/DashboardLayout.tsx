@@ -230,7 +230,12 @@ export default function DashboardLayout({ user, existingPortfolio, children }: D
         const statusResponse = await fetch(`/api/generate-portfolio/status?jobId=${jobId}`);
         
         if (statusResponse.status === 404) {
-          throw new Error("Generation job not found. Please try again.");
+          // If we get a 404, the job might not be visible yet due to eventual consistency
+          // or initialization delay. We'll return null to keep polling.
+          if (attempts > 5) {
+             console.warn(`Job ${jobId} still not found after ${attempts} attempts`);
+          }
+          return null;
         }
         
         if (!statusResponse.ok) {

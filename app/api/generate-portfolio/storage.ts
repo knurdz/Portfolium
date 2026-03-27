@@ -1,11 +1,19 @@
 // Shared in-memory storage for generation status
-// In production, replace with Redis or a database
-export const generationStatus = new Map<string, {
-  status: 'processing' | 'completed' | 'failed';
-  portfolio?: string;
-  error?: string;
-  provider?: string;
-}>();
+// Use globalThis to persist during HMR in development
+const globalForGeneration = globalThis as unknown as {
+  generationStatus: Map<string, {
+    status: 'processing' | 'completed' | 'failed';
+    portfolio?: string;
+    error?: string;
+    provider?: string;
+  }>;
+};
+
+export const generationStatus = globalForGeneration.generationStatus || new Map();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForGeneration.generationStatus = generationStatus;
+}
 
 // Generate unique job ID
 export function generateJobId(): string {
