@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
+import { X, CheckCircle2, AlertCircle, Info } from "lucide-react";
 
 export interface ToastProps {
   id: string;
@@ -70,15 +70,15 @@ function Toast({ title, description, variant = "default", onClose }: ToastCompon
   };
 
   const variantStyles = {
-    default: "bg-white border-[#E5E7EB]",
-    success: "bg-green-50 border-green-200",
-    error: "bg-red-50 border-red-200",
+    default: "bg-card border-border text-card-foreground shadow-lg shadow-black/5 dark:shadow-black/20",
+    success: "bg-emerald-500/10 border-emerald-500/30 text-foreground dark:bg-emerald-950/40 dark:border-emerald-500/30 shadow-lg",
+    error: "bg-destructive/10 border-destructive/30 text-foreground dark:bg-destructive/20 dark:border-destructive/30 shadow-lg",
   };
 
   const iconStyles = {
-    default: "text-[#4F46E5]",
-    success: "text-green-600",
-    error: "text-red-600",
+    default: "text-violet-500",
+    success: "text-emerald-500",
+    error: "text-destructive",
   };
 
   return (
@@ -86,104 +86,41 @@ function Toast({ title, description, variant = "default", onClose }: ToastCompon
       className={`pointer-events-auto transform transition-all duration-300 ease-out ${
         isExiting
           ? "translate-y-0 opacity-0 scale-95"
-          : "translate-y-0 opacity-100 scale-100"
+          : "translate-y-0 opacity-100 scale-100 animate-slide-in"
       }`}
-      style={{
-        animation: isExiting ? undefined : "slideIn 0.3s ease-out",
-      }}
     >
       <div
-        className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg ${variantStyles[variant]}`}
+        className={`flex items-start gap-3 p-4 rounded-xl border backdrop-blur-md ${variantStyles[variant]}`}
       >
+        {variant === "default" && (
+          <Info className={`w-5 h-5 shrink-0 mt-0.5 ${iconStyles.default}`} />
+        )}
         {variant === "success" && (
-          <svg
-            className={`w-5 h-5 shrink-0 mt-0.5 ${iconStyles[variant]}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <CheckCircle2 className={`w-5 h-5 shrink-0 mt-0.5 ${iconStyles.success}`} />
         )}
         {variant === "error" && (
-          <svg
-            className={`w-5 h-5 shrink-0 mt-0.5 ${iconStyles[variant]}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${iconStyles.error}`} />
         )}
         <div className="flex-1 min-w-0">
           {title && (
-            <p
-              className={`text-sm font-semibold ${
-                variant === "error"
-                  ? "text-red-900"
-                  : variant === "success"
-                  ? "text-green-900"
-                  : "text-[#111827]"
-              }`}
-            >
+            <p className="text-sm font-semibold text-foreground">
               {title}
             </p>
           )}
           {description && (
-            <p
-              className={`text-sm mt-1 ${
-                variant === "error"
-                  ? "text-red-700"
-                  : variant === "success"
-                  ? "text-green-700"
-                  : "text-[#6B7280]"
-              }`}
-            >
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               {description}
             </p>
           )}
         </div>
         <button
           onClick={handleClose}
-          className={`shrink-0 p-1 rounded hover:bg-black/5 transition-colors ${
-            variant === "error"
-              ? "text-red-600"
-              : variant === "success"
-              ? "text-green-600"
-              : "text-[#6B7280]"
-          }`}
+          className="shrink-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          aria-label="Close notification"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
     </div>
   );
-}
-
-// Add keyframes to global styles
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes slideIn {
-      from {
-        transform: translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-  `;
-  document.head.appendChild(style);
 }

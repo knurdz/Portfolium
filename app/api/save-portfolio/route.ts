@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { savePortfolio } from "@/lib/actions/portfolio";
+import { createSessionClient } from "@/lib/appwrite";
 
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    try {
+      const { account } = await createSessionClient();
+      await account.get();
+    } catch {
+      return NextResponse.json(
+        { error: "Authentication required. Please sign in." },
+        { status: 401 }
+      );
+    }
+
     const { subdomain, htmlContent } = await request.json();
 
     if (!subdomain || !htmlContent) {
@@ -28,9 +40,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const err = error as Error;
-    console.error("Error saving portfolio:", err);
+    console.error("Error saving portfolio:", err.message);
     return NextResponse.json(
-      { error: err.message || "Failed to save portfolio" },
+      { error: "Failed to save portfolio" },
       { status: 500 }
     );
   }

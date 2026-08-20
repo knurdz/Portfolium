@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { 
   Layers, 
@@ -134,8 +135,8 @@ export default function Home() {
               <div className="flex items-center gap-4 pt-8 text-sm text-muted-foreground font-medium">
                 <div className="flex -space-x-2">
                   {[1,2,3].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center overflow-hidden">
-                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i * 15}`} alt="user" className="w-full h-full object-cover" />
+                    <div key={i} className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center overflow-hidden relative">
+                      <Image src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i * 15}`} alt="user" fill unoptimized className="object-cover" />
                     </div>
                   ))}
                   <div className="w-8 h-8 rounded-full bg-border border-2 border-background flex items-center justify-center text-xs">+</div>
@@ -159,8 +160,8 @@ export default function Home() {
                 {/* Mockup Body Content */}
                 <div className="p-8 h-full bg-gradient-to-br from-card to-muted/20 animate-[pulse_4s_ease-in-out_infinite]">
                   <div className="flex items-start gap-6">
-                    <div className="w-24 h-24 rounded-2xl bg-muted border border-border flex shrink-0 items-center justify-center overflow-hidden shadow-inner">
-                       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Main" alt="avatar" className="w-full h-full object-cover"/>
+                    <div className="w-24 h-24 rounded-2xl bg-muted border border-border flex shrink-0 items-center justify-center overflow-hidden shadow-inner relative">
+                       <Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=Main" alt="avatar" fill unoptimized className="object-cover"/>
                     </div>
                     <div className="flex-1 space-y-4 pt-1">
                       <div className="w-2/3 h-5 bg-muted rounded"></div>
@@ -258,10 +259,12 @@ export default function Home() {
               ].map((theme) => (
                 <div key={theme.name} className="group relative rounded-3xl overflow-hidden border border-border bg-card hover:border-violet-500/30 transition-all duration-300">
                    <div className={`aspect-[16/10] relative overflow-hidden border-b border-border`}>
-                      <img 
+                      <Image 
                         src={theme.img} 
                         alt={theme.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                       <div className="absolute top-4 right-4 px-3 py-1 bg-background/80 backdrop-blur rounded-full text-xs font-semibold">
                          Free
