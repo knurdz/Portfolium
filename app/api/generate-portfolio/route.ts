@@ -1,9 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateJobId, generationStatus } from "./storage";
-import { createAdminClient, DATABASE_ID, JOBS_COLLECTION_ID } from "@/lib/appwrite";
+import { generateJobId, generationStatus, cleanupOldJobs } from "./storage";
+import { createAdminClient, createSessionClient, DATABASE_ID, JOBS_COLLECTION_ID } from "@/lib/appwrite";
 import { PORTFOLIO_TEMPLATES } from "@/lib/templates";
 
-// Fallback function using OpenAI-compatible API (Groq is free and fast)
+// Simple in-memory rate limiter (per-user, 5 requests per minute)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
+// Strip potentially dangerous content from user input
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+    .substring(0, 10000); // Limit input length
+}
+
 async function generateWithGroq(userInfo: string, templateId?: string) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -23,7 +53,7 @@ async function generateWithGroq(userInfo: string, templateId?: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile", // Free tier available
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -68,19 +98,43 @@ Return ONLY the complete HTML code, no explanations or markdown code blocks. The
 
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    let userId: string;
+    try {
+      const { account } = await createSessionClient();
+      const user = await account.get();
+      userId = user.$id;
+    } catch {
+      return NextResponse.json(
+        { error: "Authentication required. Please sign in." },
+        { status: 401 }
+      );
+    }
+
+    // Rate limiting
+    if (!checkRateLimit(userId)) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a minute before trying again." },
+        { status: 429 }
+      );
+    }
+
+    // Cleanup old in-memory jobs
+    cleanupOldJobs();
+
     const formData = await request.formData();
     const details = formData.get("details") as string;
     const cvFile = formData.get("cv") as File | null;
-    const selectedModel = formData.get("model") as string || "gemini-2.5-flash";
+    const selectedModel = formData.get("model") as string || "groq";
     const template = formData.get("template") as string || "";
 
-    let userInfo = details || "";
+    let userInfo = details ? sanitizeInput(details) : "";
 
     // If CV file is provided, extract text from it
     if (cvFile) {
       try {
         const cvText = await cvFile.text();
-        userInfo += `\n\nCV Content:\n${cvText}`;
+        userInfo += `\n\nCV Content:\n${sanitizeInput(cvText)}`;
       } catch (fileError) {
         console.error("Error reading CV file:", fileError);
         return NextResponse.json(
@@ -114,14 +168,10 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date().toISOString()
         }
       );
-      console.log(`[${jobId}] Job created in database`);
     } catch (dbError: unknown) {
       console.warn(`[${jobId}] Database unavailable, using in-memory storage:`, (dbError as Error).message);
-      // Fallback to in-memory storage if database collection doesn't exist
       useDatabase = false;
-      generationStatus.set(jobId, { status: 'processing' });
-      console.log(`[${jobId}] Job created in memory (fallback)`);
-      console.log(`[${jobId}] In-memory jobs after creation:`, Array.from(generationStatus.keys()));
+      generationStatus.set(jobId, { status: 'processing', createdAt: Date.now() });
     }
     
     // Start async generation (don't await)
@@ -134,9 +184,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const err = error as Error;
-    console.error("Error starting portfolio generation:", err);
+    console.error("Error starting portfolio generation:", err.message);
     return NextResponse.json(
-      { error: "Failed to start portfolio generation", details: err.message },
+      { error: "Failed to start portfolio generation" },
       { status: 500 }
     );
   }
@@ -144,19 +194,13 @@ export async function POST(request: NextRequest) {
 
 // Async generation function
 async function generatePortfolioAsync(jobId: string, userInfo: string, selectedModel: string, useDatabase: boolean = true, templateId?: string) {
-  console.log(`[${jobId}] Starting portfolio generation with Groq using ${useDatabase ? 'database' : 'in-memory'} storage...`);
-  if (templateId) console.log(`[${jobId}] Requested template: ${templateId}`);
-  
   try {
     let portfolio = "";
     let usedProvider = "";
 
-    // Use Groq for generation
     try {
-      console.log(`[${jobId}] Using Groq Llama 3.3 70B...`);
       portfolio = await generateWithGroq(userInfo, templateId);
       usedProvider = `Groq Llama 3.3 70B (${templateId || 'Default'})`;
-      console.log(`[${jobId}] Portfolio generated successfully with Groq, length:`, portfolio.length);
     } catch (groqError) {
       console.error(`[${jobId}] Groq failed:`, (groqError as Error).message);
       throw new Error("Portfolio generation failed. Please try again.");
@@ -169,9 +213,6 @@ async function generatePortfolioAsync(jobId: string, userInfo: string, selectedM
 
     // Clean up the response (remove markdown code blocks if present)
     portfolio = portfolio.replace(/```html\n?/g, "").replace(/```\n?/g, "").trim();
-    
-    console.log(`[${jobId}] Final portfolio length:`, portfolio.length);
-    console.log(`[${jobId}] Portfolio preview:`, portfolio.substring(0, 200));
 
     // Update status to completed
     if (useDatabase) {
@@ -188,35 +229,25 @@ async function generatePortfolioAsync(jobId: string, userInfo: string, selectedM
             updatedAt: new Date().toISOString()
           }
         );
-        console.log(`[${jobId}] Portfolio generation completed successfully with ${usedProvider} (saved to database)`);
       } catch (dbError) {
-        console.error(`[${jobId}] Failed to update job status in database, falling back to memory:`, dbError);
-        generationStatus.set(jobId, { status: 'completed', portfolio, provider: usedProvider });
+        console.error(`[${jobId}] Database update failed, falling back to memory:`, dbError);
+        generationStatus.set(jobId, { status: 'completed', portfolio, provider: usedProvider, createdAt: Date.now() });
       }
     } else {
-      generationStatus.set(jobId, { status: 'completed', portfolio, provider: usedProvider });
-      console.log(`[${jobId}] Portfolio generation completed successfully with ${usedProvider} (saved to memory)`);
+      generationStatus.set(jobId, { status: 'completed', portfolio, provider: usedProvider, createdAt: Date.now() });
     }
   } catch (error: unknown) {
     const err = error as Error & { status?: number; statusText?: string };
-    console.error(`[${jobId}] Error generating portfolio:`, err);
-    console.error(`[${jobId}] Error details:`, {
-      message: err.message,
-      stack: err.stack,
-      name: err.name,
-      status: err.status,
-      statusText: err.statusText,
-    });
+    console.error(`[${jobId}] Error generating portfolio:`, err.message);
     
-    // Provide more specific error messages
     let errorMessage = "Failed to generate portfolio. Please try again.";
     
     if (err.message?.includes("API key") || err.message?.includes("API_KEY")) {
-      errorMessage = "Invalid API key. Please check your Gemini API key configuration.";
+      errorMessage = "Invalid API key. Please check your API key configuration.";
     } else if (err.message?.includes("quota") || err.message?.includes("limit") || err.message?.includes("429")) {
       errorMessage = "API quota exceeded. Please try again later or check your API limits.";
     } else if (err.message?.includes("timeout")) {
-      errorMessage = "Request timed out. The portfolio generation took too long. Please try with less information.";
+      errorMessage = "Request timed out. Please try with less information.";
     } else if (err.message?.includes("ENOTFOUND") || err.message?.includes("ECONNREFUSED") || err.message?.includes("fetch")) {
       errorMessage = "Unable to connect to AI service. Please check if the API is accessible.";
     } else if (err.message?.includes("model")) {
@@ -240,11 +271,11 @@ async function generatePortfolioAsync(jobId: string, userInfo: string, selectedM
           }
         );
       } catch (dbError) {
-        console.error(`[${jobId}] Failed to update job status in database, falling back to memory:`, dbError);
-        generationStatus.set(jobId, { status: 'failed', error: errorMessage });
+        console.error(`[${jobId}] Failed to update job status:`, dbError);
+        generationStatus.set(jobId, { status: 'failed', error: errorMessage, createdAt: Date.now() });
       }
     } else {
-      generationStatus.set(jobId, { status: 'failed', error: errorMessage });
+      generationStatus.set(jobId, { status: 'failed', error: errorMessage, createdAt: Date.now() });
     }
   }
 }

@@ -76,9 +76,8 @@ function OAuthButtons({ onSignIn }: { readonly onSignIn: (p: OAuthProvider) => v
   );
 }
 
-function PasswordStrengthIndicator({ password, strength, label, color, barColor }: { 
+function PasswordStrengthIndicator({ password, label, color, barColor }: { 
   readonly password: string; 
-  readonly strength: number; 
   readonly label: string; 
   readonly color: string; 
   readonly barColor: string; 
@@ -263,7 +262,6 @@ function SignUpForm() {
         </div>
         <PasswordStrengthIndicator 
           password={password} 
-          strength={passwordStrength.strength} 
           label={passwordStrength.label} 
           color={passwordStrength.color} 
           barColor={strengthBarColor} 

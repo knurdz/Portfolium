@@ -15,21 +15,17 @@ export async function signUp(_prevState: FormState | null, formData: FormData): 
   const name = formData.get("name") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 
-  // Debug logging
-  console.log("SignUp attempt:", { email, name, hasPassword: !!password, hasConfirmPassword: !!confirmPassword });
+
 
   if (!email || !password || !name) {
-    console.log("Missing fields:", { email: !!email, password: !!password, name: !!name });
     return { error: "All fields are required" };
   }
 
   if (password !== confirmPassword) {
-    console.log("Password mismatch");
     return { error: "Passwords do not match" };
   }
 
   if (password.length < 8) {
-    console.log("Password too short:", password.length);
     return { error: "Password must be at least 8 characters long" };
   }
 
@@ -82,12 +78,6 @@ export async function signUp(_prevState: FormState | null, formData: FormData): 
     console.error("Signup error:", error);
     const err = error as { code?: number; message?: string; type?: string; response?: { message?: string; code?: number } };
     
-    // Log the complete error object
-    console.log("Error code:", err.code);
-    console.log("Error message:", err.message);
-    console.log("Error type:", err.type);
-    console.log("Error response:", err.response);
-    
     if (err.code === 409) {
       return { error: "An account with this email already exists." };
     }
@@ -95,7 +85,6 @@ export async function signUp(_prevState: FormState | null, formData: FormData): 
     if (err.code === 400) {
       // More specific error messages for 400 errors
       const message = err.response?.message || err.message || "";
-      console.log("400 error message:", message);
       
       if (message.toLowerCase().includes("password")) {
         return { error: "Password must be 8-256 characters with at least one uppercase, lowercase, number and special character." };
@@ -110,9 +99,6 @@ export async function signUp(_prevState: FormState | null, formData: FormData): 
       // Return the actual Appwrite error message if available
       return { error: message || "Invalid input. Please check your details and try again." };
     }
-    
-    // Log full error for debugging
-    console.error("Full error details:", JSON.stringify(err, null, 2));
     
     return { error: err.message || "An error occurred during sign up. Please try again." };
   }
@@ -159,9 +145,6 @@ export async function signOut() {
   } catch (error) {
     console.error("Signout error:", error);
   }
-  
-  (await cookies()).delete("appwrite-session");
-  redirect("/auth/signin");
   
   (await cookies()).delete("appwrite-session");
   redirect("/auth/signin");

@@ -7,8 +7,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const jobId = searchParams.get("jobId");
 
-    console.log(`[Status Check] jobId: ${jobId}`);
-
     if (!jobId) {
       return NextResponse.json({ error: "Job ID required" }, { status: 400 });
     }
@@ -22,9 +20,6 @@ export async function GET(request: NextRequest) {
         jobId
       );
 
-      console.log(`[Status Check] Job ${jobId} status from database:`, job.status);
-
-      // Return job data
       const response: {
         status: string;
         portfolio?: string;
@@ -42,23 +37,14 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(response);
-    } catch (dbError: unknown) {
-      const err = dbError as { code?: number; type?: string; message?: string };
-      console.log(`[Status Check] Database check failed (${err.message}), trying in-memory storage...`);
-      
+    } catch {
       // Fallback to in-memory storage
       const memoryStatus = generationStatus.get(jobId);
       
       if (memoryStatus) {
-        console.log(`[Status Check] Job ${jobId} found in memory, status:`, memoryStatus.status);
         return NextResponse.json(memoryStatus);
       }
       
-      console.log(`[Status Check] Job ${jobId} not found in database or memory`);
-      console.log(`[Status Check] Current memory job count: ${generationStatus.size}`);
-      if (generationStatus.size > 0) {
-        console.log(`[Status Check] Available jobs in memory:`, Array.from(generationStatus.keys()).slice(0, 5));
-      }
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
   } catch (error) {
